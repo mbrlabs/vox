@@ -1,6 +1,9 @@
 package gocraft
 
+import "github.com/mbrlabs/gocraft/gocraft/glm"
+
 type Camera struct {
+	projection glm.Mat4
 }
 
 func NewCamera(windowWidth, windowHeight float32) *Camera {
