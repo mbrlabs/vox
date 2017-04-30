@@ -65,6 +65,13 @@ func (m *Mat4) Identity() *Mat4 {
 	return m
 }
 
+func (m *Mat4) Set(data [16]float32) *Mat4 {
+	for i := 0; i < 16; i++ {
+		m.Data[i] = data[i]
+	}
+	return m
+}
+
 func (m *Mat4) Perspective(fov, aspectRatio, near, far float32) *Mat4 {
 	m.Identity()
 
@@ -80,6 +87,31 @@ func (m *Mat4) Perspective(fov, aspectRatio, near, far float32) *Mat4 {
 	m.Data[m23] = c
 
 	return m
+}
+
+func (m *Mat4) Mul(o *Mat4) *Mat4 {
+	var tmp [16]float32
+	tmp[m00] = m.Data[m00]*o.Data[m00] + m.Data[m01]*o.Data[m10] + m.Data[m02]*o.Data[m20] + m.Data[m03]*o.Data[m30]
+	tmp[m10] = m.Data[m10]*o.Data[m00] + m.Data[m11]*o.Data[m10] + m.Data[m12]*o.Data[m20] + m.Data[m13]*o.Data[m30]
+	tmp[m20] = m.Data[m20]*o.Data[m00] + m.Data[m21]*o.Data[m10] + m.Data[m22]*o.Data[m20] + m.Data[m23]*o.Data[m30]
+	tmp[m30] = m.Data[m30]*o.Data[m00] + m.Data[m31]*o.Data[m10] + m.Data[m32]*o.Data[m20] + m.Data[m33]*o.Data[m30]
+
+	tmp[m01] = m.Data[m00]*o.Data[m01] + m.Data[m01]*o.Data[m11] + m.Data[m02]*o.Data[m21] + m.Data[m03]*o.Data[m31]
+	tmp[m11] = m.Data[m10]*o.Data[m01] + m.Data[m11]*o.Data[m11] + m.Data[m12]*o.Data[m21] + m.Data[m13]*o.Data[m31]
+	tmp[m21] = m.Data[m20]*o.Data[m01] + m.Data[m21]*o.Data[m11] + m.Data[m22]*o.Data[m21] + m.Data[m23]*o.Data[m31]
+	tmp[m31] = m.Data[m30]*o.Data[m01] + m.Data[m31]*o.Data[m11] + m.Data[m32]*o.Data[m21] + m.Data[m33]*o.Data[m31]
+
+	tmp[m02] = m.Data[m00]*o.Data[m02] + m.Data[m01]*o.Data[m12] + m.Data[m02]*o.Data[m22] + m.Data[m03]*o.Data[m32]
+	tmp[m12] = m.Data[m10]*o.Data[m02] + m.Data[m11]*o.Data[m12] + m.Data[m12]*o.Data[m22] + m.Data[m13]*o.Data[m32]
+	tmp[m22] = m.Data[m20]*o.Data[m02] + m.Data[m21]*o.Data[m12] + m.Data[m22]*o.Data[m22] + m.Data[m23]*o.Data[m32]
+	tmp[m32] = m.Data[m30]*o.Data[m02] + m.Data[m31]*o.Data[m12] + m.Data[m32]*o.Data[m22] + m.Data[m33]*o.Data[m32]
+
+	tmp[m03] = m.Data[m00]*o.Data[m03] + m.Data[m01]*o.Data[m13] + m.Data[m02]*o.Data[m23] + m.Data[m03]*o.Data[m33]
+	tmp[m13] = m.Data[m10]*o.Data[m03] + m.Data[m11]*o.Data[m13] + m.Data[m12]*o.Data[m23] + m.Data[m13]*o.Data[m33]
+	tmp[m23] = m.Data[m20]*o.Data[m03] + m.Data[m21]*o.Data[m13] + m.Data[m22]*o.Data[m23] + m.Data[m23]*o.Data[m33]
+	tmp[m33] = m.Data[m30]*o.Data[m03] + m.Data[m31]*o.Data[m13] + m.Data[m32]*o.Data[m23] + m.Data[m33]*o.Data[m33]
+
+	return m.Set(tmp)
 }
 
 func (m *Mat4) String() string {
