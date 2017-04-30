@@ -14,10 +14,15 @@ type Shader struct {
 	fragPath string
 }
 
-func compileShader(source string, shaderType uint32) (uint32, error) {
-	shader := gl.CreateShader(shaderType)
+func compileShader(path string, shaderType uint32) (uint32, error) {
+	// read sources
+	source, err := ioutil.ReadFile(path)
+	if err != nil {
+		return 0, err
+	}
 
-	csources, free := gl.Strs(source)
+	shader := gl.CreateShader(shaderType)
+	csources, free := gl.Strs(string(source))
 	gl.ShaderSource(shader, 1, csources, nil)
 	free()
 	gl.CompileShader(shader)
@@ -32,47 +37,38 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 		log := strings.Repeat("\x00", int(logLength+1))
 		gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(log))
 
-		return 0, fmt.Errorf("failed to compile %v: %v", source, log)
+		return 0, fmt.Errorf("Failed to compile %v: %v", path, log)
 	}
 
 	return shader, nil
 }
 
-func NewShader(vertexPath, fragmentPath string) *Shader {
-	// read vertex source
-	vertexSource, err := ioutil.ReadFile(vertexPath)
-	if err != nil {
-		fmt.Print(err)
-		return nil
-	}
-
-	// read fragment source
-	fragmentSource, err := ioutil.ReadFile(fragmentPath)
-	if err != nil {
-		fmt.Print(err)
-		return nil
-	}
-
+func NewShader(vertexPath, fragmentPath string) (*Shader, error) {
 	// compile vertex shader
-	vertexShader, err := compileShader(string(vertexSource), gl.VERTEX_SHADER)
+	vertexShader, err := compileShader(vertexPath, gl.VERTEX_SHADER)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	// compile fragment shader
-	fragmentShader, err := compileShader(string(fragmentSource), gl.FRAGMENT_SHADER)
+	fragmentShader, err := compileShader(fragmentPath, gl.FRAGMENT_SHADER)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
-	// create program
 	program := gl.CreateProgram()
 	gl.AttachShader(program, vertexShader)
 	gl.AttachShader(program, fragmentShader)
+
+	// bind vbos
+	gl.BindAttribLocation(program, AttribIndexPositions, gl.Str("a_pos\x00"))
+	gl.BindAttribLocation(program, AttribIndexUvs, gl.Str("a_uvs\x00"))
+	gl.BindAttribLocation(program, AttribIndexNormals, gl.Str("a_norm\x00"))
+
 	gl.LinkProgram(program)
 
 	// check for link errors
-	var status int32
+	/*var status int32
 	gl.GetProgramiv(program, gl.LINK_STATUS, &status)
 	if status == gl.FALSE {
 		var logLength int32
@@ -81,9 +77,8 @@ func NewShader(vertexPath, fragmentPath string) *Shader {
 		log := strings.Repeat("\x00", int(logLength+1))
 		gl.GetProgramInfoLog(program, logLength, nil, gl.Str(log))
 
-		fmt.Printf("failed to link program: %v", log)
-		return nil
-	}
+		return nil, fmt.Errorf("Failed to link program: %v", log)
+	} */
 
 	gl.DeleteShader(vertexShader)
 	gl.DeleteShader(fragmentShader)
@@ -92,7 +87,7 @@ func NewShader(vertexPath, fragmentPath string) *Shader {
 		id:       program,
 		vertPath: vertexPath,
 		fragPath: vertexPath,
-	}
+	}, nil
 }
 
 func (s *Shader) Enable() {
@@ -101,4 +96,9 @@ func (s *Shader) Enable() {
 
 func (s *Shader) Disable() {
 	gl.UseProgram(0)
+}
+
+func (s *Shader) Dispose() {
+	s.Disable()
+	gl.DeleteProgram(s.id)
 }

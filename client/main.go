@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-gl/gl/v3.3-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
-	"github.com/mbrlabs/gocraft/gocraft"
+	"github.com/mbrlabs/gocraft"
 )
 
 const (
@@ -60,7 +60,14 @@ func main() {
 	setupOpenGL()
 
 	// test shaders
-	gocraft.NewShader("shaders/world.frag.glsl", "shaders/world.vert.glsl")
+	shader, err := gocraft.NewShader("shaders/world.frag.glsl", "shaders/world.vert.glsl")
+	if err != nil {
+		panic(err)
+	}
+	defer shader.Dispose()
+
+	vao := gocraft.NewVao()
+	defer vao.Dispose()
 
 	// game loop
 	for !window.ShouldClose() {
