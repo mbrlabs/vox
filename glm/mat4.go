@@ -36,6 +36,11 @@ const m13 = 13
 const m23 = 14
 const m33 = 15
 
+var (
+	tmpMat4 *Mat4    = NewMat4(false)
+	tmpVec3 *Vector3 = &Vector3{0, 0, 0}
+)
+
 type Mat4 struct {
 	Data [16]float32
 }
@@ -112,6 +117,65 @@ func (m *Mat4) Mul(o *Mat4) *Mat4 {
 	tmp[m33] = m.Data[m30]*o.Data[m03] + m.Data[m31]*o.Data[m13] + m.Data[m32]*o.Data[m23] + m.Data[m33]*o.Data[m33]
 
 	return m.Set(tmp)
+}
+
+func (m *Mat4) Translation(x, y, z float32) *Mat4 {
+	m.Identity()
+	m.Data[m03] = x
+	m.Data[m13] = y
+	m.Data[m23] = z
+	return m
+}
+
+func (m *Mat4) Translate(x, y, z float32) *Mat4 {
+	tmpMat4.Translation(x, y, z)
+	return m.Mul(tmpMat4)
+}
+
+func (m *Mat4) Scaling(x, y, z float32) *Mat4 {
+	m.Reset()
+	m.Data[m00] = x
+	m.Data[m11] = y
+	m.Data[m22] = z
+	return m
+}
+
+func (m *Mat4) Scale(x, y, z float32) *Mat4 {
+	m.Data[m00] *= x
+	m.Data[m11] *= y
+	m.Data[m22] *= z
+	return m
+}
+
+func (m *Mat4) Rotation(angle, xAxis, yAxis, zAxis float32) *Mat4 {
+	if angle == 0 {
+		return m
+	}
+
+	m.Identity()
+	rad := float64(ToRadians * angle)
+	c := float32(math.Cos(rad))
+	s := float32(math.Sin(rad))
+	omc := 1.0 - c
+
+	m.Data[m00] = xAxis*xAxis*omc + c
+	m.Data[m10] = yAxis*xAxis*omc - zAxis*s
+	m.Data[m20] = xAxis*zAxis*omc + yAxis*s
+
+	m.Data[m01] = yAxis*xAxis*omc + zAxis*s
+	m.Data[m11] = yAxis*yAxis*omc + c
+	m.Data[m21] = yAxis*zAxis*omc - xAxis*s
+
+	m.Data[m02] = xAxis*zAxis*omc - yAxis*s
+	m.Data[m12] = yAxis*zAxis*omc + xAxis*s
+	m.Data[m22] = zAxis*zAxis*omc + c
+
+	return m
+}
+
+func (m *Mat4) Rotate(angle, xAxis, yAxis, zAxis float32) *Mat4 {
+	tmpMat4.Rotation(angle, xAxis, yAxis, zAxis)
+	return m.Mul(tmpMat4)
 }
 
 func (m *Mat4) String() string {
