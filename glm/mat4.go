@@ -80,10 +80,10 @@ func (m *Mat4) Set(data [16]float32) *Mat4 {
 func (m *Mat4) Perspective(fov, aspectRatio, near, far float32) *Mat4 {
 	m.Identity()
 
-	q := float32(1.0 / math.Tan(ToRadians*0.5*float64(fov)))
+	q := float32(1.0 / math.Tan(ToRadians*(0.5*float64(fov))))
 	a := q / aspectRatio
 	b := (near + far) / (near - far)
-	c := (2.0 / near * far) / (near - far)
+	c := (2.0 * near * far) / (near - far)
 
 	m.Data[m00] = a
 	m.Data[m11] = q

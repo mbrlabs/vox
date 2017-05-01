@@ -9,7 +9,7 @@ import (
 )
 
 type Shader struct {
-	id       uint32
+	ID       uint32
 	vertPath string
 	fragPath string
 }
@@ -22,7 +22,7 @@ func compileShader(path string, shaderType uint32) (uint32, error) {
 	}
 
 	shader := gl.CreateShader(shaderType)
-	csources, free := gl.Strs(string(source))
+	csources, free := gl.Strs(string(source) + "\x00")
 	gl.ShaderSource(shader, 1, csources, nil)
 	free()
 	gl.CompileShader(shader)
@@ -66,9 +66,10 @@ func NewShader(vertexPath, fragmentPath string) (*Shader, error) {
 	gl.BindAttribLocation(program, AttribIndexNormals, gl.Str("a_norm\x00"))
 
 	gl.LinkProgram(program)
+	//gl.ValidateProgram(program)
 
 	// check for link errors
-	/*var status int32
+	var status int32
 	gl.GetProgramiv(program, gl.LINK_STATUS, &status)
 	if status == gl.FALSE {
 		var logLength int32
@@ -78,20 +79,20 @@ func NewShader(vertexPath, fragmentPath string) (*Shader, error) {
 		gl.GetProgramInfoLog(program, logLength, nil, gl.Str(log))
 
 		return nil, fmt.Errorf("Failed to link program: %v", log)
-	} */
+	}
 
 	gl.DeleteShader(vertexShader)
 	gl.DeleteShader(fragmentShader)
 
 	return &Shader{
-		id:       program,
+		ID:       program,
 		vertPath: vertexPath,
 		fragPath: vertexPath,
 	}, nil
 }
 
 func (s *Shader) Enable() {
-	gl.UseProgram(s.id)
+	gl.UseProgram(s.ID)
 }
 
 func (s *Shader) Disable() {
@@ -100,5 +101,5 @@ func (s *Shader) Disable() {
 
 func (s *Shader) Dispose() {
 	s.Disable()
-	gl.DeleteProgram(s.id)
+	gl.DeleteProgram(s.ID)
 }

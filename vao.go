@@ -53,6 +53,20 @@ func (v *Vao) Load(positions []float32, indices []uint16, uvs []float32, normals
 	gl.BindVertexArray(0)
 }
 
+func (v *Vao) Bind() {
+	gl.BindVertexArray(v.id)
+	gl.EnableVertexAttribArray(AttribIndexPositions)
+	gl.EnableVertexAttribArray(AttribIndexUvs)
+	gl.EnableVertexAttribArray(AttribIndexNormals)
+}
+
+func (v *Vao) Unbind() {
+	gl.DisableVertexAttribArray(AttribIndexNormals)
+	gl.DisableVertexAttribArray(AttribIndexUvs)
+	gl.DisableVertexAttribArray(AttribIndexPositions)
+	gl.BindVertexArray(0)
+}
+
 func (v *Vao) Dispose() {
 	// TODO delete buffers as well?
 	gl.DeleteVertexArrays(1, &v.id)
