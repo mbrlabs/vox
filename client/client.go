@@ -19,11 +19,11 @@ const (
 )
 
 const (
-	WireframeVertexShader   = "shaders/wire.vert.glsl"
-	WireframeFragmentShader = "shaders/wire.frag.glsl"
+	WireframeVertexShader   = "shaders/wire.vert"
+	WireframeFragmentShader = "shaders/wire.frag"
 
-	WorldVertexShader   = "shaders/world.vert.glsl"
-	WorldFragmentShader = "shaders/world.frag.glsl"
+	WorldVertexShader   = "shaders/world.vert"
+	WorldFragmentShader = "shaders/world.frag"
 )
 
 // ----------------------------------------------------------------------------
