@@ -66,36 +66,36 @@ func createCube() *gocraft.Vao {
 	// cube positions
 	verts := []float32{
 		// front
-		-0.5, -0.5, 0.5,
-		0.5, -0.5, 0.5,
-		0.5, 0.5, 0.5,
-		-0.5, 0.5, 0.5,
+		-0.5, -0.5, 0.5, // 0
+		0.5, -0.5, 0.5, // 1
+		0.5, 0.5, 0.5, // 2
+		-0.5, 0.5, 0.5, // 3
 		// back
-		-0.5, -0.5, -0.5,
-		0.5, -0.5, -0.5,
-		0.5, 0.5, -0.5,
-		-0.5, 0.5, -0.5,
+		-0.5, -0.5, -0.5, // 4
+		0.5, -0.5, -0.5, // 5
+		0.5, 0.5, -0.5, // 6
+		-0.5, 0.5, -0.5, // 7
 	}
 	// cube indices
 	indices := []uint16{
 		// front
 		0, 1, 2,
 		2, 3, 0,
-		// top
-		1, 5, 6,
-		6, 2, 1,
 		// back
-		7, 6, 5,
 		5, 4, 7,
-		// bottom
-		4, 0, 3,
-		3, 7, 4,
-		// left
-		4, 5, 1,
-		1, 0, 4,
-		// right
+		7, 6, 5,
+		// top
 		3, 2, 6,
 		6, 7, 3,
+		// bottom
+		0, 1, 5,
+		5, 4, 0,
+		// left
+		4, 0, 3,
+		3, 7, 4,
+		// right
+		1, 5, 6,
+		6, 2, 1,
 	}
 	uvs := []float32{1, 2}
 	normals := []float32{1, 2}
@@ -177,7 +177,7 @@ func main() {
 	mvp := glm.NewMat4(true)
 
 	// voxel data
-	voxel := gocraft.Block(0x04) // 0x04 -> teal
+	voxel := gocraft.Block(0x01) // 0x04 -> teal
 
 	// game loop
 	gl.Enable(gl.DEPTH_TEST)
