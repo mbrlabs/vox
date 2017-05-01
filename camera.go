@@ -10,9 +10,9 @@ type Camera struct {
 	dirtyView  bool
 }
 
-func NewCamera(windowWidth, windowHeight float32) *Camera {
+func NewCamera(fov, ratio, near, far float32) *Camera {
 	p := glm.NewMat4(false)
-	p.Perspective(70, windowWidth/windowHeight, 0.01, 1000)
+	p.Perspective(fov, ratio, near, far)
 
 	v := glm.NewMat4(true)
 
@@ -21,7 +21,7 @@ func NewCamera(windowWidth, windowHeight float32) *Camera {
 		projection: p,
 		dirtyView:  true,
 		view:       v,
-		position:   &glm.Vector3{0, 0, 0},
+		position:   &glm.Vector3{X: 0, Y: 0, Z: 0},
 	}
 	cam.Update()
 	return cam

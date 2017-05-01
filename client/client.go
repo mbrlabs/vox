@@ -70,15 +70,15 @@ func main() {
 	// cube positions
 	verts := []float32{
 		// front
-		-1.0, -1.0, 1.0,
-		1.0, -1.0, 1.0,
-		1.0, 1.0, 1.0,
-		-1.0, 1.0, 1.0,
+		-0.5, -0.5, 0.5,
+		0.5, -0.5, 0.5,
+		0.5, 0.5, 0.5,
+		-0.5, 0.5, 0.5,
 		// back
-		-1.0, -1.0, -1.0,
-		1.0, -1.0, -1.0,
-		1.0, 1.0, -1.0,
-		-1.0, 1.0, -1.0,
+		-0.5, -0.5, -0.5,
+		0.5, -0.5, -0.5,
+		0.5, 0.5, -0.5,
+		-0.5, 0.5, -0.5,
 	}
 	// cube indices
 	indices := []uint16{
@@ -108,12 +108,13 @@ func main() {
 	defer vao.Dispose()
 	vao.Load(verts, indices, uvs, normals)
 
-	cam := gocraft.NewCamera(windowWidth, windowHeight)
-
-	mvpUniform := gl.GetUniformLocation(shader.ID, gl.Str("u_mvp\x00"))
+	ratio := float32(windowWidth) / float32(windowHeight)
+	cam := gocraft.NewCamera(70, ratio, 0.01, 1000)
 
 	model := glm.NewMat4(true)
-	model.Translation(0.5, 0.5, -10)
+	model.Translation(0, 0.5, -5)
+
+	mvpUniform := gl.GetUniformLocation(shader.ID, gl.Str("u_mvp\x00"))
 	mvp := glm.NewMat4(true)
 
 	gl.Enable(gl.DEPTH_TEST)
