@@ -15,7 +15,7 @@ func (b Block) Activate(active bool) Block {
 	if active {
 		return b | blockActiveMask
 	}
-	return 0
+	return b & blockTypeMask
 }
 
 func (b Block) BlockType() uint8 {
