@@ -98,6 +98,28 @@ func createCube() *gocraft.Vao {
 }
 
 // ----------------------------------------------------------------------------
+func createShaders() (*gocraft.Shader, *gocraft.Shader) {
+	// world shader
+	attribs := []gocraft.VertexAttribute{
+		gocraft.VertexAttribute{Position: gocraft.AttribIndexPositions, Name: "a_pos"},
+		gocraft.VertexAttribute{Position: gocraft.AttribIndexUvs, Name: "a_uvs"},
+		gocraft.VertexAttribute{Position: gocraft.AttribIndexNormals, Name: "a_norm"},
+	}
+	worldShader, err := gocraft.NewShader("shaders/world.vert.glsl", "shaders/world.frag.glsl", attribs)
+	if err != nil {
+		panic(err)
+	}
+
+	// wireframe shader
+	wireShader, err := gocraft.NewShader("shaders/wire.vert.glsl", "shaders/wire.frag.glsl", nil)
+	if err != nil {
+		panic(err)
+	}
+
+	return worldShader, wireShader
+}
+
+// ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 func main() {
 	// setup glfw
@@ -109,17 +131,10 @@ func main() {
 	window := setupWindow()
 	setupOpenGL()
 
-	// test shaders
-	attribs := []gocraft.VertexAttribute{
-		gocraft.VertexAttribute{Position: gocraft.AttribIndexPositions, Name: "a_pos"},
-		gocraft.VertexAttribute{Position: gocraft.AttribIndexUvs, Name: "a_uvs"},
-		gocraft.VertexAttribute{Position: gocraft.AttribIndexNormals, Name: "a_norm"},
-	}
-	shader, err := gocraft.NewShader("shaders/world.vert.glsl", "shaders/world.frag.glsl", attribs)
-	if err != nil {
-		panic(err)
-	}
-	defer shader.Dispose()
+	// shaders
+	worldShader, wireShader := createShaders()
+	defer worldShader.Dispose()
+	defer wireShader.Dispose()
 
 	cube := createCube()
 	defer cube.Dispose()
@@ -130,7 +145,9 @@ func main() {
 	model := glm.NewMat4(true)
 	model.Translation(0, 0.5, -5)
 
-	mvpUniform := gl.GetUniformLocation(shader.ID, gl.Str("u_mvp\x00"))
+	worldMvpUniform := gl.GetUniformLocation(worldShader.ID, gl.Str("u_mvp\x00"))
+	wireMvpUniform := gl.GetUniformLocation(wireShader.ID, gl.Str("u_mvp\x00"))
+
 	mvp := glm.NewMat4(true)
 
 	gl.Enable(gl.DEPTH_TEST)
@@ -139,22 +156,30 @@ func main() {
 	for !window.ShouldClose() {
 		// clear window
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-		gl.ClearColor(0.8, 0.8, 0.8, 0.0)
+		gl.ClearColor(0.9, 0.9, 0.9, 0.0)
 
-		model.Rotate(5, 0, -1, 0)
+		model.Rotate(2, 0, -1, 0)
 		cam.Update()
-
 		mvp.Set(cam.Combined.Data)
 		mvp.Mul(model)
 
-		shader.Enable()
 		cube.Bind()
 
-		gl.UniformMatrix4fv(mvpUniform, 1, false, &mvp.Data[0])
+		// draw solid
+		worldShader.Enable()
+		gl.UniformMatrix4fv(worldMvpUniform, 1, false, &mvp.Data[0])
 		gl.DrawElements(gl.TRIANGLES, cube.IndexCount, gl.UNSIGNED_SHORT, gl.PtrOffset(0))
+		worldShader.Disable()
+
+		// draw wireframe
+		gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
+		wireShader.Enable()
+		gl.UniformMatrix4fv(wireMvpUniform, 1, false, &mvp.Data[0])
+		gl.DrawElements(gl.TRIANGLES, cube.IndexCount, gl.UNSIGNED_SHORT, gl.PtrOffset(0))
+		wireShader.Disable()
+		gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
 
 		cube.Unbind()
-		shader.Disable()
 
 		// glfw update
 		window.SwapBuffers()
