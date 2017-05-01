@@ -18,12 +18,14 @@ const (
 	windowHeight = 768
 )
 
+// ----------------------------------------------------------------------------
 func init() {
 	// This is needed to arrange that main() runs on main thread.
 	// See documentation for functions that are only allowed to be called from the main thread.
 	runtime.LockOSThread()
 }
 
+// ----------------------------------------------------------------------------
 func setupWindow() *glfw.Window {
 	// window hints
 	glfw.WindowHint(glfw.Resizable, glfw.False)
@@ -41,6 +43,7 @@ func setupWindow() *glfw.Window {
 	return window
 }
 
+// ----------------------------------------------------------------------------
 func setupOpenGL() {
 	if err := gl.Init(); err != nil {
 		log.Fatalln(err)
@@ -50,23 +53,8 @@ func setupOpenGL() {
 	fmt.Println("OpenGL version", version)
 }
 
-func main() {
-	// setup glfw
-	if err := glfw.Init(); err != nil {
-		log.Fatalln("failed to initialize glfw:", err)
-	}
-	defer glfw.Terminate()
-
-	window := setupWindow()
-	setupOpenGL()
-
-	// test shaders
-	shader, err := gocraft.NewShader("shaders/world.vert.glsl", "shaders/world.frag.glsl")
-	if err != nil {
-		panic(err)
-	}
-	defer shader.Dispose()
-
+// ----------------------------------------------------------------------------
+func createCube() *gocraft.Vao {
 	// cube positions
 	verts := []float32{
 		// front
@@ -105,8 +93,36 @@ func main() {
 	normals := []float32{1, 2}
 
 	vao := gocraft.NewVao()
-	defer vao.Dispose()
 	vao.Load(verts, indices, uvs, normals)
+	return vao
+}
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+func main() {
+	// setup glfw
+	if err := glfw.Init(); err != nil {
+		log.Fatalln("failed to initialize glfw:", err)
+	}
+	defer glfw.Terminate()
+
+	window := setupWindow()
+	setupOpenGL()
+
+	// test shaders
+	attribs := []gocraft.VertexAttribute{
+		gocraft.VertexAttribute{Position: gocraft.AttribIndexPositions, Name: "a_pos"},
+		gocraft.VertexAttribute{Position: gocraft.AttribIndexUvs, Name: "a_uvs"},
+		gocraft.VertexAttribute{Position: gocraft.AttribIndexNormals, Name: "a_norm"},
+	}
+	shader, err := gocraft.NewShader("shaders/world.vert.glsl", "shaders/world.frag.glsl", attribs)
+	if err != nil {
+		panic(err)
+	}
+	defer shader.Dispose()
+
+	cube := createCube()
+	defer cube.Dispose()
 
 	ratio := float32(windowWidth) / float32(windowHeight)
 	cam := gocraft.NewCamera(70, ratio, 0.01, 1000)
@@ -123,7 +139,7 @@ func main() {
 	for !window.ShouldClose() {
 		// clear window
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-		gl.ClearColor(0.5, 1, 1, 0.0)
+		gl.ClearColor(0.8, 0.8, 0.8, 0.0)
 
 		model.Rotate(5, 0, -1, 0)
 		cam.Update()
@@ -132,12 +148,12 @@ func main() {
 		mvp.Mul(model)
 
 		shader.Enable()
-		vao.Bind()
+		cube.Bind()
 
 		gl.UniformMatrix4fv(mvpUniform, 1, false, &mvp.Data[0])
-		gl.DrawElements(gl.TRIANGLES, int32(len(indices)), gl.UNSIGNED_SHORT, gl.PtrOffset(0))
+		gl.DrawElements(gl.TRIANGLES, cube.IndexCount, gl.UNSIGNED_SHORT, gl.PtrOffset(0))
 
-		vao.Unbind()
+		cube.Unbind()
 		shader.Disable()
 
 		// glfw update

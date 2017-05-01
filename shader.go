@@ -8,6 +8,11 @@ import (
 	"github.com/go-gl/gl/v3.3-core/gl"
 )
 
+type VertexAttribute struct {
+	Position uint32
+	Name     string
+}
+
 type Shader struct {
 	ID       uint32
 	vertPath string
@@ -43,7 +48,7 @@ func compileShader(path string, shaderType uint32) (uint32, error) {
 	return shader, nil
 }
 
-func NewShader(vertexPath, fragmentPath string) (*Shader, error) {
+func NewShader(vertexPath, fragmentPath string, attribs []VertexAttribute) (*Shader, error) {
 	// compile vertex shader
 	vertexShader, err := compileShader(vertexPath, gl.VERTEX_SHADER)
 	if err != nil {
@@ -61,9 +66,13 @@ func NewShader(vertexPath, fragmentPath string) (*Shader, error) {
 	gl.AttachShader(program, fragmentShader)
 
 	// bind vbos
-	gl.BindAttribLocation(program, AttribIndexPositions, gl.Str("a_pos\x00"))
-	gl.BindAttribLocation(program, AttribIndexUvs, gl.Str("a_uvs\x00"))
-	gl.BindAttribLocation(program, AttribIndexNormals, gl.Str("a_norm\x00"))
+	for _, attrib := range attribs {
+		gl.BindAttribLocation(program, attrib.Position, gl.Str(attrib.Name+"\x00"))
+	}
+
+	//gl.BindAttribLocation(program, AttribIndexPositions, gl.Str("a_pos\x00"))
+	//gl.BindAttribLocation(program, AttribIndexUvs, gl.Str("a_uvs\x00"))
+	//gl.BindAttribLocation(program, AttribIndexNormals, gl.Str("a_norm\x00"))
 
 	gl.LinkProgram(program)
 	//gl.ValidateProgram(program)

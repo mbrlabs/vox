@@ -14,6 +14,8 @@ type Vao struct {
 	indexBuffer    uint32
 	uvBuffer       uint32
 	normalBuffer   uint32
+
+	IndexCount int32
 }
 
 func NewVao() *Vao {
@@ -51,6 +53,8 @@ func (v *Vao) Load(positions []float32, indices []uint16, uvs []float32, normals
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	gl.BindVertexArray(0)
+
+	v.IndexCount = int32(len(indices))
 }
 
 func (v *Vao) Bind() {
