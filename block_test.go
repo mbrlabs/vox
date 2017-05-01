@@ -2,7 +2,7 @@ package gocraft
 
 import "testing"
 
-func TestBlock(t *testing.T) {
+func TestBlockActive(t *testing.T) {
 	var blocks [12]Block
 
 	for _, b := range blocks {

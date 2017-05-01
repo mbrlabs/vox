@@ -42,9 +42,9 @@ func (v *Vao) Load(positions []float32, indices []uint16, uvs []float32, normals
 	gl.VertexAttribPointer(AttribIndexPositions, 3, gl.FLOAT, false, 0, gl.PtrOffset(0))
 
 	// uvs
-	gl.BindBuffer(gl.ARRAY_BUFFER, v.uvBuffer)
-	gl.BufferData(gl.ARRAY_BUFFER, len(uvs)*4, gl.Ptr(uvs), gl.STATIC_DRAW)
-	gl.VertexAttribPointer(AttribIndexUvs, 3, gl.FLOAT, false, 0, gl.PtrOffset(0))
+	//gl.BindBuffer(gl.ARRAY_BUFFER, v.uvBuffer)
+	//gl.BufferData(gl.ARRAY_BUFFER, len(uvs)*4, gl.Ptr(uvs), gl.STATIC_DRAW)
+	//gl.VertexAttribPointer(AttribIndexUvs, 3, gl.FLOAT, false, 0, gl.PtrOffset(0))
 
 	// normals
 	gl.BindBuffer(gl.ARRAY_BUFFER, v.normalBuffer)
@@ -60,13 +60,13 @@ func (v *Vao) Load(positions []float32, indices []uint16, uvs []float32, normals
 func (v *Vao) Bind() {
 	gl.BindVertexArray(v.id)
 	gl.EnableVertexAttribArray(AttribIndexPositions)
-	gl.EnableVertexAttribArray(AttribIndexUvs)
+	//gl.EnableVertexAttribArray(AttribIndexUvs)
 	gl.EnableVertexAttribArray(AttribIndexNormals)
 }
 
 func (v *Vao) Unbind() {
 	gl.DisableVertexAttribArray(AttribIndexNormals)
-	gl.DisableVertexAttribArray(AttribIndexUvs)
+	//gl.DisableVertexAttribArray(AttribIndexUvs)
 	gl.DisableVertexAttribArray(AttribIndexPositions)
 	gl.BindVertexArray(0)
 }

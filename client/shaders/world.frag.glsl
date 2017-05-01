@@ -1,10 +1,10 @@
 #version 330
 
-uniform sampler2D tex;
+uniform vec3 u_color;
 
 in vec2 fragTexCoord;
 out vec4 outColor;
 
 void main() {
-    outColor = vec4(0.5, 1.0, 1.0, 1.0);
+    outColor = vec4(u_color, 1.0);
 }

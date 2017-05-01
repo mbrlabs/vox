@@ -18,6 +18,14 @@ const (
 	windowHeight = 768
 )
 
+const (
+	WireframeVertexShader   = "shaders/wire.vert.glsl"
+	WireframeFragmentShader = "shaders/wire.frag.glsl"
+
+	WorldVertexShader   = "shaders/world.vert.glsl"
+	WorldFragmentShader = "shaders/world.frag.glsl"
+)
+
 // ----------------------------------------------------------------------------
 func init() {
 	// This is needed to arrange that main() runs on main thread.
@@ -105,18 +113,31 @@ func createShaders() (*gocraft.Shader, *gocraft.Shader) {
 		gocraft.VertexAttribute{Position: gocraft.AttribIndexUvs, Name: "a_uvs"},
 		gocraft.VertexAttribute{Position: gocraft.AttribIndexNormals, Name: "a_norm"},
 	}
-	worldShader, err := gocraft.NewShader("shaders/world.vert.glsl", "shaders/world.frag.glsl", attribs)
+	worldShader, err := gocraft.NewShader(WorldVertexShader, WorldFragmentShader, attribs)
 	if err != nil {
 		panic(err)
 	}
 
 	// wireframe shader
-	wireShader, err := gocraft.NewShader("shaders/wire.vert.glsl", "shaders/wire.frag.glsl", nil)
+	attribs = []gocraft.VertexAttribute{
+		gocraft.VertexAttribute{Position: gocraft.AttribIndexPositions, Name: "a_pos"},
+	}
+	wireShader, err := gocraft.NewShader(WireframeVertexShader, WireframeFragmentShader, attribs)
 	if err != nil {
 		panic(err)
 	}
 
 	return worldShader, wireShader
+}
+
+// ----------------------------------------------------------------------------
+func createBlockTypes() map[uint8]*gocraft.BlockType {
+	defs := make(map[uint8]*gocraft.BlockType)
+	defs[0x01] = &gocraft.BlockType{Color: gocraft.ColorRed.Copy()}   // red
+	defs[0x02] = &gocraft.BlockType{Color: gocraft.ColorGreen.Copy()} // green
+	defs[0x03] = &gocraft.BlockType{Color: gocraft.ColorBlue.Copy()}  // blue
+	defs[0x04] = &gocraft.BlockType{Color: gocraft.ColorTeal.Copy()}  // teal
+	return defs
 }
 
 // ----------------------------------------------------------------------------
@@ -136,27 +157,34 @@ func main() {
 	defer worldShader.Dispose()
 	defer wireShader.Dispose()
 
+	// block definitions
+	blocks := createBlockTypes()
+
+	// cube mesh
 	cube := createCube()
 	defer cube.Dispose()
-
-	ratio := float32(windowWidth) / float32(windowHeight)
-	cam := gocraft.NewCamera(70, ratio, 0.01, 1000)
-
 	model := glm.NewMat4(true)
 	model.Translation(0, 0.5, -5)
 
-	worldMvpUniform := gl.GetUniformLocation(worldShader.ID, gl.Str("u_mvp\x00"))
-	wireMvpUniform := gl.GetUniformLocation(wireShader.ID, gl.Str("u_mvp\x00"))
+	// camera
+	ratio := float32(windowWidth) / float32(windowHeight)
+	cam := gocraft.NewCamera(70, ratio, 0.01, 1000)
 
+	// uniforms
+	worldMvpUniform := gl.GetUniformLocation(worldShader.ID, gl.Str("u_mvp\x00"))
+	worldColorUniform := gl.GetUniformLocation(worldShader.ID, gl.Str("u_color\x00"))
+	wireMvpUniform := gl.GetUniformLocation(wireShader.ID, gl.Str("u_mvp\x00"))
 	mvp := glm.NewMat4(true)
 
-	gl.Enable(gl.DEPTH_TEST)
+	// voxel data
+	voxel := gocraft.Block(0x04) // 0x04 -> teal
 
 	// game loop
+	gl.Enable(gl.DEPTH_TEST)
 	for !window.ShouldClose() {
 		// clear window
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-		gl.ClearColor(0.9, 0.9, 0.9, 0.0)
+		gl.ClearColor(0.95, 0.95, 0.95, 0.0)
 
 		model.Rotate(2, 0, -1, 0)
 		cam.Update()
@@ -166,8 +194,10 @@ func main() {
 		cube.Bind()
 
 		// draw solid
+		color := blocks[voxel.BlockType()].Color
 		worldShader.Enable()
 		gl.UniformMatrix4fv(worldMvpUniform, 1, false, &mvp.Data[0])
+		gl.Uniform3f(worldColorUniform, color.R, color.G, color.B)
 		gl.DrawElements(gl.TRIANGLES, cube.IndexCount, gl.UNSIGNED_SHORT, gl.PtrOffset(0))
 		worldShader.Disable()
 
