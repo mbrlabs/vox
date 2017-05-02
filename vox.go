@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"log"
 	"sync"
+	"time"
 
 	"github.com/go-gl/gl/v3.3-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
@@ -27,24 +28,35 @@ var (
 	voxInstance *vox
 )
 
+// ----------------------------------------------------------------------------
+
+// KeyListener todo
 type KeyListener interface {
-	KeyDown(keycode int)
-	KeyUp(keycode int)
+	KeyDown(keycode int) bool
+	KeyUp(keycode int) bool
 }
 
+// ----------------------------------------------------------------------------
+
+// MouseListener todo
 type MouseListener interface {
-	//MouseDown(x, y float64)
-	//MouseUp(x, y float64)
-	MouseMoved(x, y float64)
+	//MouseDown(x, y float64) bool
+	//MouseUp(x, y float64) bool
+	MouseMoved(x, y float64) bool
 }
 
+// ----------------------------------------------------------------------------
+
+// Game todo
 type Game interface {
 	Disposable
 	Create()
 	Resize(width, height int)
 	Render(delta float32)
-	Update(delate float32)
+	Update(delta float32)
 }
+
+// ----------------------------------------------------------------------------
 
 type vox struct {
 	win            *Window
@@ -65,31 +77,44 @@ func setupVox(win *Window) {
 	})
 }
 
+// Vox todo
 func Vox() *vox {
 	return voxInstance
 }
 
+// Callback for glfw event
 func (v *vox) onMouseMoved(xpos, ypos float64) {
 	v.MouseX = xpos
 	v.MouseY = ypos
 
 	for _, listener := range v.mouseListeners {
-		listener.MouseMoved(xpos, ypos)
+		if listener.MouseMoved(xpos, ypos) {
+			break
+		}
 	}
 }
 
+// AddKeyListener todo
 func (v *vox) AddKeyListener(listener KeyListener) {
 	v.keyListeners = append(v.keyListeners, listener)
 }
 
+// AddMouseListener todo
 func (v *vox) AddMouseListener(listener MouseListener) {
 	v.mouseListeners = append(v.mouseListeners, listener)
 }
 
+// ----------------------------------------------------------------------------
+
+// Window todo
 type Window struct {
 	glfwWindow *glfw.Window
+	lastFrame  int64
 }
 
+// ----------------------------------------------------------------------------
+
+// WindowConfig todo
 type WindowConfig struct {
 	Height     int
 	Width      int
@@ -99,6 +124,7 @@ type WindowConfig struct {
 	Vsync      bool
 }
 
+// NewWindow todo
 func NewWindow(config *WindowConfig) *Window {
 	// setup glfw
 	if err := glfw.Init(); err != nil {
@@ -123,7 +149,7 @@ func NewWindow(config *WindowConfig) *Window {
 	}
 	window.MakeContextCurrent()
 
-	// vsync?
+	// vsync
 	if config.Vsync {
 		glfw.SwapInterval(1)
 	}
@@ -144,18 +170,24 @@ func NewWindow(config *WindowConfig) *Window {
 	return win
 }
 
+// Dispose todo
 func (w *Window) Dispose() {
 	glfw.Terminate()
 }
 
+// Start todo
 func (w *Window) Start(game Game) {
 	defer game.Dispose()
 	game.Create()
+	w.lastFrame = time.Now().Unix()
 
 	for !w.glfwWindow.ShouldClose() {
 		// game update
-		game.Update(1)
-		game.Render(1)
+		deltaNano := time.Now().UnixNano() - w.lastFrame
+		deltaSeconds := float32(float64(deltaNano) / 1000000000.0)
+		game.Update(deltaSeconds)
+		game.Render(deltaSeconds)
+		w.lastFrame = time.Now().UnixNano()
 
 		// glfw update
 		w.glfwWindow.SwapBuffers()

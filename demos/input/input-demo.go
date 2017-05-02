@@ -55,8 +55,9 @@ func (d *InputDemo) Resize(width, height int) {
 
 }
 
-func (d *InputDemo) MouseMoved(x, y float64) {
+func (d *InputDemo) MouseMoved(x, y float64) bool {
 	fmt.Printf("Mouse position: %v,%v\n", x, y)
+	return false
 }
 
 // ----------------------------------------------------------------------------
