@@ -1,4 +1,4 @@
-# Vox
+# Vox [![](https://travis-ci.org/mbrlabs/vox.svg?branch=master)](https://travis-ci.org/mbrlabs/vox)
 A voxel engine written in Go & OpenGL.
 
 ## Dependencies
