@@ -4,13 +4,17 @@ const (
 	ChunkWidth  = 16
 	ChunkDepth  = 16
 	ChunkHeight = 16
+	ChunkXZSize = ChunkWidth * ChunkDepth
 )
 
 type Chunk struct {
-	Blocks [ChunkWidth * ChunkHeight * ChunkDepth]Block
+	Blocks [ChunkWidth * ChunkDepth * ChunkHeight]Block
 }
 
-func (c *Chunk) GetBlock(x, y, z int) Block {
-	// FIXME not sure about this
-	return c.Blocks[x+z*ChunkDepth+y*ChunkHeight]
+func (c *Chunk) Get(x, y, z int) Block {
+	return c.Blocks[x+z*ChunkDepth+y*ChunkXZSize]
+}
+
+func (c *Chunk) Set(x, y, z int, block Block) {
+	c.Blocks[x+z*ChunkDepth+y*ChunkXZSize] = block
 }

@@ -211,12 +211,6 @@ func main() {
 
 		cube.Unbind()
 
-		var b uint8 = 7
-		var bp *uint8 = &b
-		*bp = 9
-
-		fmt.Println(b)
-
 		// glfw update
 		window.SwapBuffers()
 		glfw.PollEvents()
