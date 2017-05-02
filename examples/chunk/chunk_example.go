@@ -1,12 +1,9 @@
 package main
 
 import (
-	"fmt"
-	"log"
 	"runtime"
 
 	"github.com/go-gl/gl/v3.3-core/gl"
-	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/mbrlabs/gocraft"
 	"github.com/mbrlabs/gocraft/glm"
 )
@@ -24,41 +21,6 @@ const (
 	WorldVertexShader   = "../shaders/world.vert"
 	WorldFragmentShader = "../shaders/world.frag"
 )
-
-// ----------------------------------------------------------------------------
-func init() {
-	// This is needed to arrange that main() runs on main thread.
-	// See documentation for functions that are only allowed to be called from the main thread.
-	runtime.LockOSThread()
-}
-
-// ----------------------------------------------------------------------------
-func setupWindow() *glfw.Window {
-	// window hints
-	glfw.WindowHint(glfw.Resizable, glfw.False)
-	glfw.WindowHint(glfw.ContextVersionMajor, 3)
-	glfw.WindowHint(glfw.ContextVersionMinor, 3)
-	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
-	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
-
-	// create window & make current
-	window, err := glfw.CreateWindow(windowWidth, windowHeight, windowTitle, nil, nil)
-	if err != nil {
-		panic(err)
-	}
-	window.MakeContextCurrent()
-	return window
-}
-
-// ----------------------------------------------------------------------------
-func setupOpenGL() {
-	if err := gl.Init(); err != nil {
-		log.Fatalln(err)
-	}
-
-	version := gl.GoStr(gl.GetString(gl.VERSION))
-	fmt.Println("OpenGL version", version)
-}
 
 // ----------------------------------------------------------------------------
 func createChunkMesh() *gocraft.Vao {
@@ -106,81 +68,99 @@ func createBlockTypes() map[uint8]*gocraft.BlockType {
 	return defs
 }
 
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-func main() {
-	// setup glfw
-	if err := glfw.Init(); err != nil {
-		log.Fatalln("failed to initialize glfw:", err)
-	}
-	defer glfw.Terminate()
+type ChunkDemo struct {
+	blockTypes map[uint8]*gocraft.BlockType
 
-	window := setupWindow()
-	setupOpenGL()
+	modelMatrix *glm.Mat4
+	camera      *gocraft.Camera
+	chunk       *gocraft.Vao
 
-	// shaders
-	worldShader, wireShader := createShaders()
-	defer worldShader.Dispose()
-	defer wireShader.Dispose()
+	mvp *glm.Mat4
 
-	// block definitions
-	blocks := createBlockTypes()
+	worldShader     *gocraft.Shader
+	wireShader      *gocraft.Shader
+	worldMvpUniform int32
+	wireMvpUniform  int32
+}
 
-	// cube mesh
-	chunk := createChunkMesh()
-	defer chunk.Dispose()
-	model := glm.NewMat4(true)
-	model.Translation(0, -10, -50)
+func (d *ChunkDemo) Create() {
+	d.worldShader, d.wireShader = createShaders()
+	d.blockTypes = createBlockTypes()
+	d.chunk = createChunkMesh()
 
-	// camera
+	d.worldMvpUniform = gl.GetUniformLocation(d.worldShader.ID, gl.Str("u_mvp\x00"))
+	d.wireMvpUniform = gl.GetUniformLocation(d.wireShader.ID, gl.Str("u_mvp\x00"))
+
 	ratio := float32(windowWidth) / float32(windowHeight)
-	cam := gocraft.NewCamera(70, ratio, 0.01, 1000)
+	d.camera = gocraft.NewCamera(70, ratio, 0.01, 1000)
 
-	// uniforms
-	worldMvpUniform := gl.GetUniformLocation(worldShader.ID, gl.Str("u_mvp\x00"))
-	worldColorUniform := gl.GetUniformLocation(worldShader.ID, gl.Str("u_color\x00"))
-	wireMvpUniform := gl.GetUniformLocation(wireShader.ID, gl.Str("u_mvp\x00"))
-	mvp := glm.NewMat4(true)
+	d.modelMatrix = glm.NewMat4(true)
+	d.modelMatrix.Translation(0, 0, -50)
 
-	// voxel data
-	voxel := gocraft.Block(0x01) // 0x04 -> teal
+	d.mvp = glm.NewMat4(true)
 
-	// game loop
 	gl.Enable(gl.DEPTH_TEST)
-	for !window.ShouldClose() {
-		// clear window
-		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-		gl.ClearColor(0.95, 0.95, 0.95, 0.0)
+}
 
-		model.Rotate(2, 0, -1, 0)
-		cam.Update()
-		mvp.Set(cam.Combined.Data)
-		mvp.Mul(model)
+func (d *ChunkDemo) Dispose() {
+	d.wireShader.Dispose()
+	d.worldShader.Dispose()
+	d.chunk.Dispose()
+}
 
-		chunk.Bind()
+func (d *ChunkDemo) Update(delta float32) {
+	d.modelMatrix.Rotate(2, 0, -1, 0)
+	d.camera.Update()
+	d.mvp.Set(d.camera.Combined.Data)
+	d.mvp.Mul(d.modelMatrix)
+}
 
-		// draw solid
-		if true {
-			color := blocks[voxel.BlockType()].Color
-			worldShader.Enable()
-			gl.UniformMatrix4fv(worldMvpUniform, 1, false, &mvp.Data[0])
-			gl.Uniform3f(worldColorUniform, color.R, color.G, color.B)
-			gl.DrawElements(gl.TRIANGLES, chunk.IndexCount, gl.UNSIGNED_SHORT, gl.PtrOffset(0))
-			worldShader.Disable()
-		}
+func (d *ChunkDemo) Render(delta float32) {
+	// clear window
+	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+	gl.ClearColor(0.95, 0.95, 0.95, 0.0)
 
-		// draw wireframe
-		gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
-		wireShader.Enable()
-		gl.UniformMatrix4fv(wireMvpUniform, 1, false, &mvp.Data[0])
-		gl.DrawElements(gl.TRIANGLES, chunk.IndexCount, gl.UNSIGNED_SHORT, gl.PtrOffset(0))
-		wireShader.Disable()
-		gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
+	d.chunk.Bind()
 
-		chunk.Unbind()
-
-		// glfw update
-		window.SwapBuffers()
-		glfw.PollEvents()
+	// draw solid
+	if true {
+		d.worldShader.Enable()
+		gl.UniformMatrix4fv(d.worldMvpUniform, 1, false, &d.mvp.Data[0])
+		gl.DrawElements(gl.TRIANGLES, d.chunk.IndexCount, gl.UNSIGNED_SHORT, gl.PtrOffset(0))
+		d.worldShader.Disable()
 	}
+
+	// draw wireframe
+	gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
+	d.wireShader.Enable()
+	gl.UniformMatrix4fv(d.wireMvpUniform, 1, false, &d.mvp.Data[0])
+	gl.DrawElements(gl.TRIANGLES, d.chunk.IndexCount, gl.UNSIGNED_SHORT, gl.PtrOffset(0))
+	d.wireShader.Disable()
+	gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
+
+	d.chunk.Unbind()
+}
+
+func (d *ChunkDemo) Resize(width, height int) {
+
+}
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+func init() {
+	runtime.LockOSThread()
+}
+
+func main() {
+	window := gocraft.NewWindow(&gocraft.WindowConfig{
+		Height:     windowHeight,
+		Width:      windowWidth,
+		Title:      windowTitle,
+		Resizable:  false,
+		Fullscreen: false,
+		Vsync:      true,
+	})
+
+	window.Start(&ChunkDemo{})
 }
