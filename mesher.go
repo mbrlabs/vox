@@ -20,9 +20,10 @@ func (sm *StupidMesher) Generate(chunk *Chunk) *RawMesh {
 	for x := 0; x < ChunkWidth; x++ {
 		for z := 0; z < ChunkDepth; z++ {
 			for y := 0; y < ChunkHeight; y++ {
-				//block := chunk.GetBlock(x, y, z)
-				//if block.
-				sm.addCube(float32(x), float32(y), float32(z), mesh)
+				if chunk.Get(x, y, z).Active() {
+					//fmt.Println(x, y, z)
+					sm.addCube(float32(x), float32(y), float32(z), mesh)
+				}
 			}
 		}
 	}

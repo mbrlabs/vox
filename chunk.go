@@ -5,10 +5,20 @@ const (
 	ChunkDepth  = 16
 	ChunkHeight = 16
 	ChunkXZ     = ChunkWidth * ChunkDepth
+	ChunkXYZ    = ChunkXZ * ChunkHeight
 )
 
 type Chunk struct {
 	Blocks [ChunkWidth * ChunkDepth * ChunkHeight]Block
+}
+
+func NewChunk() *Chunk {
+	c := &Chunk{}
+	for i := 0; i < ChunkXYZ; i++ {
+		c.Blocks[i] = c.Blocks[i].Activate(true)
+	}
+
+	return c
 }
 
 func (c *Chunk) Get(x, y, z int) Block {

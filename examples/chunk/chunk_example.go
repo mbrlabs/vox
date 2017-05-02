@@ -63,7 +63,7 @@ func setupOpenGL() {
 // ----------------------------------------------------------------------------
 func createChunkMesh() *gocraft.Vao {
 	mesher := gocraft.StupidMesher{}
-	chunk := &gocraft.Chunk{}
+	chunk := gocraft.NewChunk()
 	mesh := mesher.Generate(chunk)
 
 	vao := gocraft.NewVao()
