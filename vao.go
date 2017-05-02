@@ -29,7 +29,7 @@ func NewVao() *Vao {
 	return vao
 }
 
-func (v *Vao) Load(positions []float32, indices []uint16, uvs []float32, normals []float32) {
+func (v *Vao) Load(positions []float32, indices []uint16, normals []float32) {
 	gl.BindVertexArray(v.id)
 
 	// indices
@@ -48,7 +48,7 @@ func (v *Vao) Load(positions []float32, indices []uint16, uvs []float32, normals
 
 	// normals
 	gl.BindBuffer(gl.ARRAY_BUFFER, v.normalBuffer)
-	gl.BufferData(gl.ARRAY_BUFFER, len(uvs)*4, gl.Ptr(normals), gl.STATIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, len(normals)*4, gl.Ptr(normals), gl.STATIC_DRAW)
 	gl.VertexAttribPointer(AttribIndexNormals, 3, gl.FLOAT, false, 0, gl.PtrOffset(0))
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)

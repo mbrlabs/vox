@@ -12,18 +12,17 @@ import (
 )
 
 const (
-	version      = "v.0.1.0"
-	windowTitle  = "Gocraft " + version
+	windowTitle  = "Chunk example"
 	windowWidth  = 1024
 	windowHeight = 768
 )
 
 const (
-	WireframeVertexShader   = "shaders/wire.vert"
-	WireframeFragmentShader = "shaders/wire.frag"
+	WireframeVertexShader   = "../shaders/wire.vert"
+	WireframeFragmentShader = "../shaders/wire.frag"
 
-	WorldVertexShader   = "shaders/world.vert"
-	WorldFragmentShader = "shaders/world.frag"
+	WorldVertexShader   = "../shaders/world.vert"
+	WorldFragmentShader = "../shaders/world.frag"
 )
 
 // ----------------------------------------------------------------------------
@@ -62,46 +61,13 @@ func setupOpenGL() {
 }
 
 // ----------------------------------------------------------------------------
-func createCube() *gocraft.Vao {
-	// cube positions
-	verts := []float32{
-		// front
-		-0.5, -0.5, 0.5, // 0
-		0.5, -0.5, 0.5, // 1
-		0.5, 0.5, 0.5, // 2
-		-0.5, 0.5, 0.5, // 3
-		// back
-		-0.5, -0.5, -0.5, // 4
-		0.5, -0.5, -0.5, // 5
-		0.5, 0.5, -0.5, // 6
-		-0.5, 0.5, -0.5, // 7
-	}
-	// cube indices
-	indices := []uint16{
-		// front
-		0, 1, 2,
-		2, 3, 0,
-		// back
-		5, 4, 7,
-		7, 6, 5,
-		// top
-		3, 2, 6,
-		6, 7, 3,
-		// bottom
-		0, 1, 5,
-		5, 4, 0,
-		// left
-		4, 0, 3,
-		3, 7, 4,
-		// right
-		1, 5, 6,
-		6, 2, 1,
-	}
-	uvs := []float32{1, 2}
-	normals := []float32{1, 2}
+func createChunkMesh() *gocraft.Vao {
+	mesher := gocraft.StupidMesher{}
+	chunk := &gocraft.Chunk{}
+	mesh := mesher.Generate(chunk)
 
 	vao := gocraft.NewVao()
-	vao.Load(verts, indices, uvs, normals)
+	vao.Load(mesh.Positions, mesh.Indices, []float32{1, 2})
 	return vao
 }
 
@@ -161,10 +127,10 @@ func main() {
 	blocks := createBlockTypes()
 
 	// cube mesh
-	cube := createCube()
-	defer cube.Dispose()
+	chunk := createChunkMesh()
+	defer chunk.Dispose()
 	model := glm.NewMat4(true)
-	model.Translation(0, 0.5, -5)
+	model.Translation(0, -10, -50)
 
 	// camera
 	ratio := float32(windowWidth) / float32(windowHeight)
@@ -191,25 +157,27 @@ func main() {
 		mvp.Set(cam.Combined.Data)
 		mvp.Mul(model)
 
-		cube.Bind()
+		chunk.Bind()
 
 		// draw solid
-		color := blocks[voxel.BlockType()].Color
-		worldShader.Enable()
-		gl.UniformMatrix4fv(worldMvpUniform, 1, false, &mvp.Data[0])
-		gl.Uniform3f(worldColorUniform, color.R, color.G, color.B)
-		gl.DrawElements(gl.TRIANGLES, cube.IndexCount, gl.UNSIGNED_SHORT, gl.PtrOffset(0))
-		worldShader.Disable()
+		if true {
+			color := blocks[voxel.BlockType()].Color
+			worldShader.Enable()
+			gl.UniformMatrix4fv(worldMvpUniform, 1, false, &mvp.Data[0])
+			gl.Uniform3f(worldColorUniform, color.R, color.G, color.B)
+			gl.DrawElements(gl.TRIANGLES, chunk.IndexCount, gl.UNSIGNED_SHORT, gl.PtrOffset(0))
+			worldShader.Disable()
+		}
 
 		// draw wireframe
 		gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
 		wireShader.Enable()
 		gl.UniformMatrix4fv(wireMvpUniform, 1, false, &mvp.Data[0])
-		gl.DrawElements(gl.TRIANGLES, cube.IndexCount, gl.UNSIGNED_SHORT, gl.PtrOffset(0))
+		gl.DrawElements(gl.TRIANGLES, chunk.IndexCount, gl.UNSIGNED_SHORT, gl.PtrOffset(0))
 		wireShader.Disable()
 		gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
 
-		cube.Unbind()
+		chunk.Unbind()
 
 		// glfw update
 		window.SwapBuffers()

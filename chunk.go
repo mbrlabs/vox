@@ -4,7 +4,7 @@ const (
 	ChunkWidth  = 16
 	ChunkDepth  = 16
 	ChunkHeight = 16
-	ChunkXZSize = ChunkWidth * ChunkDepth
+	ChunkXZ     = ChunkWidth * ChunkDepth
 )
 
 type Chunk struct {
@@ -12,9 +12,9 @@ type Chunk struct {
 }
 
 func (c *Chunk) Get(x, y, z int) Block {
-	return c.Blocks[x+z*ChunkDepth+y*ChunkXZSize]
+	return c.Blocks[x+z*ChunkDepth+y*ChunkXZ]
 }
 
 func (c *Chunk) Set(x, y, z int, block Block) {
-	c.Blocks[x+z*ChunkDepth+y*ChunkXZSize] = block
+	c.Blocks[x+z*ChunkDepth+y*ChunkXZ] = block
 }
