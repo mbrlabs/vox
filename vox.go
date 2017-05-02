@@ -16,10 +16,27 @@ package vox
 import (
 	"fmt"
 	"log"
+	"sync"
 
 	"github.com/go-gl/gl/v3.3-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
+
+var (
+	voxOnce     sync.Once
+	voxInstance *vox
+)
+
+type KeyListener interface {
+	KeyDown(keycode int)
+	KeyUp(keycode int)
+}
+
+type MouseListener interface {
+	//MouseDown(x, y float64)
+	//MouseUp(x, y float64)
+	MouseMoved(x, y float64)
+}
 
 type Game interface {
 	Disposable
@@ -27,6 +44,46 @@ type Game interface {
 	Resize(width, height int)
 	Render(delta float32)
 	Update(delate float32)
+}
+
+type vox struct {
+	win            *Window
+	keyListeners   []KeyListener
+	mouseListeners []MouseListener
+
+	MouseX, MouseY float64
+}
+
+func setupVox(win *Window) {
+	voxOnce.Do(func() {
+		voxInstance = &vox{win: win}
+
+		// mouse moved callback
+		win.glfwWindow.SetCursorPosCallback(func(w *glfw.Window, xpos, ypos float64) {
+			voxInstance.onMouseMoved(xpos, ypos)
+		})
+	})
+}
+
+func Vox() *vox {
+	return voxInstance
+}
+
+func (v *vox) onMouseMoved(xpos, ypos float64) {
+	v.MouseX = xpos
+	v.MouseY = ypos
+
+	for _, listener := range v.mouseListeners {
+		listener.MouseMoved(xpos, ypos)
+	}
+}
+
+func (v *vox) AddKeyListener(listener KeyListener) {
+	v.keyListeners = append(v.keyListeners, listener)
+}
+
+func (v *vox) AddMouseListener(listener MouseListener) {
+	v.mouseListeners = append(v.mouseListeners, listener)
 }
 
 type Window struct {
@@ -78,9 +135,13 @@ func NewWindow(config *WindowConfig) *Window {
 	version := gl.GoStr(gl.GetString(gl.VERSION))
 	fmt.Println("Using OpenGL version", version)
 
-	return &Window{
+	// setup Vox singleton
+	win := &Window{
 		glfwWindow: window,
 	}
+	setupVox(win)
+
+	return win
 }
 
 func (w *Window) Dispose() {
