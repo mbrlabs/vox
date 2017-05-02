@@ -1,4 +1,4 @@
-package gocraft
+package vox
 
 var (
 	ColorWhite = NewColor(1, 1, 1, 1)

@@ -1,6 +1,6 @@
-package gocraft
+package vox
 
-import "github.com/mbrlabs/gocraft/glm"
+import "github.com/mbrlabs/vox/glm"
 
 type Camera struct {
 	Combined   *glm.Mat4

@@ -4,8 +4,8 @@ import (
 	"runtime"
 
 	"github.com/go-gl/gl/v3.3-core/gl"
-	"github.com/mbrlabs/gocraft"
-	"github.com/mbrlabs/gocraft/glm"
+	"github.com/mbrlabs/vox"
+	"github.com/mbrlabs/vox/glm"
 )
 
 const (
@@ -23,7 +23,7 @@ const (
 )
 
 // ----------------------------------------------------------------------------
-func createCube() *gocraft.Vao {
+func createCube() *vox.Vao {
 	// cube positions
 	verts := []float32{
 		// front
@@ -60,29 +60,29 @@ func createCube() *gocraft.Vao {
 	}
 	normals := []float32{1, 2}
 
-	vao := gocraft.NewVao()
+	vao := vox.NewVao()
 	vao.Load(verts, indices, normals)
 	return vao
 }
 
 // ----------------------------------------------------------------------------
-func createShaders() (*gocraft.Shader, *gocraft.Shader) {
+func createShaders() (*vox.Shader, *vox.Shader) {
 	// world shader
-	attribs := []gocraft.VertexAttribute{
-		gocraft.VertexAttribute{Position: gocraft.AttribIndexPositions, Name: "a_pos"},
-		gocraft.VertexAttribute{Position: gocraft.AttribIndexUvs, Name: "a_uvs"},
-		gocraft.VertexAttribute{Position: gocraft.AttribIndexNormals, Name: "a_norm"},
+	attribs := []vox.VertexAttribute{
+		vox.VertexAttribute{Position: vox.AttribIndexPositions, Name: "a_pos"},
+		vox.VertexAttribute{Position: vox.AttribIndexUvs, Name: "a_uvs"},
+		vox.VertexAttribute{Position: vox.AttribIndexNormals, Name: "a_norm"},
 	}
-	worldShader, err := gocraft.NewShader(WorldVertexShader, WorldFragmentShader, attribs)
+	worldShader, err := vox.NewShader(WorldVertexShader, WorldFragmentShader, attribs)
 	if err != nil {
 		panic(err)
 	}
 
 	// wireframe shader
-	attribs = []gocraft.VertexAttribute{
-		gocraft.VertexAttribute{Position: gocraft.AttribIndexPositions, Name: "a_pos"},
+	attribs = []vox.VertexAttribute{
+		vox.VertexAttribute{Position: vox.AttribIndexPositions, Name: "a_pos"},
 	}
-	wireShader, err := gocraft.NewShader(WireframeVertexShader, WireframeFragmentShader, attribs)
+	wireShader, err := vox.NewShader(WireframeVertexShader, WireframeFragmentShader, attribs)
 	if err != nil {
 		panic(err)
 	}
@@ -94,13 +94,13 @@ func createShaders() (*gocraft.Shader, *gocraft.Shader) {
 
 type CubeDemo struct {
 	modelMatrix *glm.Mat4
-	camera      *gocraft.Camera
-	cube        *gocraft.Vao
+	camera      *vox.Camera
+	cube        *vox.Vao
 
 	mvp *glm.Mat4
 
-	worldShader     *gocraft.Shader
-	wireShader      *gocraft.Shader
+	worldShader     *vox.Shader
+	wireShader      *vox.Shader
 	worldMvpUniform int32
 	wireMvpUniform  int32
 }
@@ -113,7 +113,7 @@ func (d *CubeDemo) Create() {
 	d.wireMvpUniform = gl.GetUniformLocation(d.wireShader.ID, gl.Str("u_mvp\x00"))
 
 	ratio := float32(windowWidth) / float32(windowHeight)
-	d.camera = gocraft.NewCamera(70, ratio, 0.01, 1000)
+	d.camera = vox.NewCamera(70, ratio, 0.01, 1000)
 
 	d.modelMatrix = glm.NewMat4(true)
 	d.modelMatrix.Translation(0, 0.5, -5)
@@ -173,7 +173,7 @@ func init() {
 }
 
 func main() {
-	window := gocraft.NewWindow(&gocraft.WindowConfig{
+	window := vox.NewWindow(&vox.WindowConfig{
 		Height:     windowHeight,
 		Width:      windowWidth,
 		Title:      windowTitle,

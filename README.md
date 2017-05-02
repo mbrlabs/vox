@@ -1,5 +1,5 @@
-# Gocraft
-A Minecraft clone written in Go.
+# Vox
+A voxel engine written in Go & OpenGL.
 
 ## Dependencies
 

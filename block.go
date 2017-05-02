@@ -1,4 +1,4 @@
-package gocraft
+package vox
 
 type Block uint8
 

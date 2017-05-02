@@ -1,4 +1,4 @@
-package gocraft
+package vox
 
 const (
 	ChunkWidth  = 16

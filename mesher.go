@@ -1,4 +1,4 @@
-package gocraft
+package vox
 
 type Mesher interface {
 	Generate(chunk *Chunk) *RawMesh
