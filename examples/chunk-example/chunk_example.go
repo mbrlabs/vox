@@ -15,11 +15,11 @@ const (
 )
 
 const (
-	WireframeVertexShader   = "../shaders/wire.vert"
-	WireframeFragmentShader = "../shaders/wire.frag"
+	WireframeVertexShader   = "../../shaders/wire.vert"
+	WireframeFragmentShader = "../../shaders/wire.frag"
 
-	WorldVertexShader   = "../shaders/world.vert"
-	WorldFragmentShader = "../shaders/world.frag"
+	WorldVertexShader   = "../../shaders/world.vert"
+	WorldFragmentShader = "../../shaders/world.frag"
 )
 
 // ----------------------------------------------------------------------------
