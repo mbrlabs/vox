@@ -41,6 +41,9 @@ func (sm *StupidMesher) Generate(chunk *Chunk) *RawMesh {
 		}
 	}
 
+	// TODO remove and generate real normals
+	mesh.Normals = append(mesh.Normals, 7)
+
 	return mesh
 }
 

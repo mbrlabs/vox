@@ -23,6 +23,7 @@ const (
 
 type Chunk struct {
 	Blocks [ChunkWidth * ChunkDepth * ChunkHeight]Block
+	Mesh   *Vao
 }
 
 func NewChunk() *Chunk {

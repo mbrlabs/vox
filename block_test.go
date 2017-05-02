@@ -39,13 +39,13 @@ func TestBlockActive(t *testing.T) {
 func TestBlockType(t *testing.T) {
 	var block Block = 7
 
-	if block.BlockType() != 7 {
+	if block.TypeID() != 7 {
 		t.Error()
 	}
 
 	block = block.Activate(true)
 
-	if block.BlockType() != 7 {
+	if block.TypeID() != 7 {
 		t.Error()
 	}
 
@@ -55,7 +55,7 @@ func TestBlockType(t *testing.T) {
 
 	block = block.Activate(false)
 
-	if block.BlockType() != 7 {
+	if block.TypeID() != 7 {
 		t.Error()
 	}
 

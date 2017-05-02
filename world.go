@@ -14,5 +14,26 @@
 package vox
 
 type World struct {
-	Chunks []*Chunk
+	mesher Mesher
+
+	Chunks    []*Chunk
+	BlockBank *BlockBank
+}
+
+func NewWorld() *World {
+	world := &World{
+		mesher: &StupidMesher{},
+	}
+
+	// TODO remove
+	// create dummy mesh
+	c := NewChunk()
+	mesh := world.mesher.Generate(c)
+	vao := NewVao()
+	vao.Load(mesh.Positions, mesh.Indices, mesh.Normals)
+	c.Mesh = vao
+
+	world.Chunks = append(world.Chunks, c)
+
+	return world
 }

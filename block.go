@@ -31,10 +31,23 @@ func (b Block) Activate(active bool) Block {
 	return b & blockTypeMask
 }
 
-func (b Block) BlockType() uint8 {
+func (b Block) TypeID() uint8 {
 	return uint8(b & blockTypeMask)
 }
 
 type BlockType struct {
+	ID    uint8
 	Color *Color
+}
+
+type BlockBank struct {
+	types map[uint8]*BlockType
+}
+
+func (b *BlockBank) AddType(blockType *BlockType) {
+	b.types[blockType.ID] = blockType
+}
+
+func (b *BlockBank) TypeOf(block Block) *BlockType {
+	return b.types[block.TypeID()]
 }

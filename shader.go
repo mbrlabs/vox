@@ -21,6 +21,14 @@ import (
 	"github.com/go-gl/gl/v3.3-core/gl"
 )
 
+const (
+	WireframeVertexShader   = "shaders/wire.vert"
+	WireframeFragmentShader = "shaders/wire.frag"
+
+	WorldVertexShader   = "shaders/world.vert"
+	WorldFragmentShader = "shaders/world.frag"
+)
+
 type VertexAttribute struct {
 	Position uint32
 	Name     string
