@@ -26,8 +26,9 @@ import (
 
 // KeyListener todo
 type KeyListener interface {
-	KeyDown(keycode int) bool
-	KeyUp(keycode int) bool
+	KeyDown(key glfw.Key) bool
+	KeyUp(key glfw.Key) bool
+	KeyPressed(key glfw.Key) bool
 }
 
 // ----------------------------------------------------------------------------
@@ -138,8 +139,33 @@ func (w *Window) Start(game Game) {
 func (w *Window) setupInputCallbacks() {
 	// mouse moved callback
 	w.glfwWindow.SetCursorPosCallback(func(win *glfw.Window, xpos, ypos float64) {
-		w.onMouseMoved(xpos, ypos)
+		for _, listener := range w.mouseListeners {
+			if listener.MouseMoved(xpos, ypos) {
+				break
+			}
+		}
 	})
+
+	// key callback
+	w.glfwWindow.SetKeyCallback(func(win *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
+		for _, listener := range w.keyListeners {
+			if action == glfw.Press {
+				if listener.KeyDown(key) {
+					break
+				}
+			} else if action == glfw.Release {
+				if listener.KeyUp(key) {
+					break
+				}
+			} else {
+				if listener.KeyPressed(key) {
+					break
+				}
+			}
+		}
+
+	})
+
 }
 
 // AddKeyListener todo
@@ -150,13 +176,4 @@ func (w *Window) addKeyListener(listener KeyListener) {
 // AddMouseListener todo
 func (w *Window) addMouseListener(listener MouseListener) {
 	w.mouseListeners = append(w.mouseListeners, listener)
-}
-
-// Callback for glfw event
-func (w *Window) onMouseMoved(xpos, ypos float64) {
-	for _, listener := range w.mouseListeners {
-		if listener.MouseMoved(xpos, ypos) {
-			break
-		}
-	}
 }
