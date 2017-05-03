@@ -71,10 +71,20 @@ func createCube() *vox.Vao {
 		1, 5, 6,
 		6, 2, 1,
 	}
+	colors := []float32{
+		0.5, 1, 1,
+		0.5, 1, 1,
+		0.5, 1, 1,
+		0.5, 1, 1,
+		0.5, 1, 1,
+		0.5, 1, 1,
+		0.5, 1, 1,
+		0.5, 1, 1,
+	}
 	normals := []float32{1, 2}
 
 	vao := vox.NewVao()
-	vao.Load(verts, indices, normals)
+	vao.Load(verts, indices, colors, normals)
 	return vao
 }
 
@@ -83,7 +93,7 @@ func createShaders() (*vox.Shader, *vox.Shader) {
 	// world shader
 	attribs := []vox.VertexAttribute{
 		vox.VertexAttribute{Position: vox.AttribIndexPositions, Name: "a_pos"},
-		vox.VertexAttribute{Position: vox.AttribIndexUvs, Name: "a_uvs"},
+		vox.VertexAttribute{Position: vox.AttribIndexColor, Name: "a_color"},
 		vox.VertexAttribute{Position: vox.AttribIndexNormals, Name: "a_norm"},
 	}
 	worldShader, err := vox.NewShader(WorldVertexShader, WorldFragmentShader, attribs)
