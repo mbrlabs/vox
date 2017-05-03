@@ -35,19 +35,31 @@ func (b Block) TypeID() uint8 {
 	return uint8(b & blockTypeMask)
 }
 
+func (b Block) ChangeType(t *BlockType) Block {
+	return Block(uint8(b) | t.ID)
+}
+
 type BlockType struct {
 	ID    uint8
 	Color *Color
 }
 
 type BlockBank struct {
-	types map[uint8]*BlockType
+	Types   []*BlockType
+	typeMap map[uint8]*BlockType
+}
+
+func NewBlockBank() *BlockBank {
+	return &BlockBank{
+		typeMap: make(map[uint8]*BlockType),
+	}
 }
 
 func (b *BlockBank) AddType(blockType *BlockType) {
-	b.types[blockType.ID] = blockType
+	b.typeMap[blockType.ID] = blockType
+	b.Types = append(b.Types, blockType)
 }
 
 func (b *BlockBank) TypeOf(block Block) *BlockType {
-	return b.types[block.TypeID()]
+	return b.typeMap[block.TypeID()]
 }

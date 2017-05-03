@@ -14,26 +14,27 @@
 package vox
 
 type World struct {
-	mesher Mesher
+	mesher    Mesher
+	generator Generator
 
 	Chunks    []*Chunk
 	BlockBank *BlockBank
 }
 
 func NewWorld() *World {
-	world := &World{
-		mesher: &StupidMesher{},
+	return &World{
+		mesher:    &StupidMesher{},
+		generator: &RandomGenerator{},
+		BlockBank: NewBlockBank(),
 	}
+}
 
-	// TODO remove
-	// create dummy mesh
-	c := NewChunk()
-	mesh := world.mesher.Generate(c)
+func (w *World) GenerateDebugWorld() {
+	c := w.generator.GenerateChunkAt(0, 0, 0, w.BlockBank)
+	mesh := w.mesher.Generate(c, w.BlockBank)
 	vao := NewVao()
-	vao.Load(mesh.Positions, mesh.Indices, mesh.Normals)
+	vao.Load(mesh.Positions, mesh.Indices, mesh.Colors, mesh.Normals)
 	c.Mesh = vao
 
-	world.Chunks = append(world.Chunks, c)
-
-	return world
+	w.Chunks = append(w.Chunks, c)
 }

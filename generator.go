@@ -11,17 +11,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#version 330 
+package vox
 
-uniform mat4 u_mvp;
+import "math/rand"
 
-in vec3 a_pos;
-in vec3 a_norm;
-in vec3 a_color;
+type Generator interface {
+	GenerateChunkAt(x, y, z int, bank *BlockBank) *Chunk
+}
 
-out vec3 color;
+type RandomGenerator struct {
+}
 
-void main() {
-    color = a_color;
-    gl_Position = u_mvp * vec4(a_pos, 1.0);
+func (g *RandomGenerator) GenerateChunkAt(x, y, z int, bank *BlockBank) *Chunk {
+	c := NewChunk()
+
+	typeIdx := 0
+
+	for i := 0; i < ChunkXYZ; i++ {
+		// active or inactive
+		if rand.Int()%2 == 0 {
+			c.Blocks[i] = c.Blocks[i].Activate(true)
+		} else {
+			continue
+		}
+
+		// block type (color)
+		if typeIdx >= len(bank.Types) {
+			typeIdx = 0
+		}
+		c.Blocks[i] = c.Blocks[i].ChangeType(bank.Types[typeIdx])
+		typeIdx++
+	}
+
+	return c
 }

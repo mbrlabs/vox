@@ -17,15 +17,16 @@ import "github.com/go-gl/gl/v3.3-core/gl"
 
 const (
 	AttribIndexPositions = 0
-	AttribIndexUvs       = 1
-	AttribIndexNormals   = 2
+	//AttribIndexUvs       = 1
+	AttribIndexColor   = 1
+	AttribIndexNormals = 2
 )
 
 type Vao struct {
 	id             uint32
 	positionBuffer uint32
 	indexBuffer    uint32
-	uvBuffer       uint32
+	colorBuffer    uint32
 	normalBuffer   uint32
 
 	IndexCount int32
@@ -36,13 +37,13 @@ func NewVao() *Vao {
 	gl.GenVertexArrays(1, &vao.id)
 	gl.GenBuffers(1, &vao.positionBuffer)
 	gl.GenBuffers(1, &vao.indexBuffer)
-	gl.GenBuffers(1, &vao.uvBuffer)
+	gl.GenBuffers(1, &vao.colorBuffer)
 	gl.GenBuffers(1, &vao.normalBuffer)
 
 	return vao
 }
 
-func (v *Vao) Load(positions []float32, indices []uint16, normals []float32) {
+func (v *Vao) Load(positions []float32, indices []uint16, colors []float32, normals []float32) {
 	gl.BindVertexArray(v.id)
 
 	// indices
@@ -53,6 +54,11 @@ func (v *Vao) Load(positions []float32, indices []uint16, normals []float32) {
 	gl.BindBuffer(gl.ARRAY_BUFFER, v.positionBuffer)
 	gl.BufferData(gl.ARRAY_BUFFER, len(positions)*4, gl.Ptr(positions), gl.STATIC_DRAW)
 	gl.VertexAttribPointer(AttribIndexPositions, 3, gl.FLOAT, false, 0, gl.PtrOffset(0))
+
+	// colors
+	gl.BindBuffer(gl.ARRAY_BUFFER, v.colorBuffer)
+	gl.BufferData(gl.ARRAY_BUFFER, len(colors)*4, gl.Ptr(colors), gl.STATIC_DRAW)
+	gl.VertexAttribPointer(AttribIndexColor, 3, gl.FLOAT, false, 0, gl.PtrOffset(0))
 
 	// uvs
 	//gl.BindBuffer(gl.ARRAY_BUFFER, v.uvBuffer)
@@ -73,12 +79,14 @@ func (v *Vao) Load(positions []float32, indices []uint16, normals []float32) {
 func (v *Vao) Bind() {
 	gl.BindVertexArray(v.id)
 	gl.EnableVertexAttribArray(AttribIndexPositions)
+	gl.EnableVertexAttribArray(AttribIndexColor)
 	//gl.EnableVertexAttribArray(AttribIndexUvs)
 	gl.EnableVertexAttribArray(AttribIndexNormals)
 }
 
 func (v *Vao) Unbind() {
 	gl.DisableVertexAttribArray(AttribIndexNormals)
+	gl.EnableVertexAttribArray(AttribIndexColor)
 	//gl.DisableVertexAttribArray(AttribIndexUvs)
 	gl.DisableVertexAttribArray(AttribIndexPositions)
 	gl.BindVertexArray(0)

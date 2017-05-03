@@ -14,7 +14,7 @@
 package vox
 
 type Mesher interface {
-	Generate(chunk *Chunk) *RawMesh
+	Generate(chunk *Chunk, bank *BlockBank) *RawMesh
 }
 
 type RawMesh struct {
@@ -27,15 +27,17 @@ type RawMesh struct {
 type StupidMesher struct {
 }
 
-func (sm *StupidMesher) Generate(chunk *Chunk) *RawMesh {
+func (sm *StupidMesher) Generate(chunk *Chunk, bank *BlockBank) *RawMesh {
 	mesh := &RawMesh{}
 
+	// positions
 	for x := 0; x < ChunkWidth; x++ {
 		for z := 0; z < ChunkDepth; z++ {
 			for y := 0; y < ChunkHeight; y++ {
-				if chunk.Get(x, y, z).Active() {
+				block := chunk.Get(x, y, z)
+				if block.Active() {
 					//fmt.Println(x, y, z)
-					sm.addCube(float32(x), float32(y), float32(z), mesh)
+					sm.addCube(float32(x), float32(y), float32(z), block, bank, mesh)
 				}
 			}
 		}
@@ -47,12 +49,13 @@ func (sm *StupidMesher) Generate(chunk *Chunk) *RawMesh {
 	return mesh
 }
 
-func (sm *StupidMesher) addCube(x, y, z float32, mesh *RawMesh) {
+func (sm *StupidMesher) addCube(x, y, z float32, block Block, bank *BlockBank, mesh *RawMesh) {
 	var CubeSize float32 = 1.0
 
 	// TODO check for overflow
 	idxOffset := uint16(len(mesh.Positions) / 3)
 
+	// positions
 	mesh.Positions = append(mesh.Positions,
 		// front positions
 		x, y, z,
@@ -67,6 +70,7 @@ func (sm *StupidMesher) addCube(x, y, z float32, mesh *RawMesh) {
 		x, y+CubeSize, z-CubeSize,
 	)
 
+	// indices
 	mesh.Indices = append(mesh.Indices,
 		// front
 		idxOffset, idxOffset+1, idxOffset+2,
@@ -87,4 +91,11 @@ func (sm *StupidMesher) addCube(x, y, z float32, mesh *RawMesh) {
 		idxOffset+1, idxOffset+5, idxOffset+6,
 		idxOffset+6, idxOffset+2, idxOffset+1,
 	)
+
+	// colors
+	blockType := bank.TypeOf(block)
+	for i := 0; i < 8; i++ {
+		mesh.Colors = append(mesh.Colors, blockType.Color.R, blockType.Color.G, blockType.Color.B)
+	}
+
 }

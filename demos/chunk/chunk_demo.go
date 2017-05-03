@@ -14,7 +14,6 @@
 package main
 
 import (
-	"fmt"
 	"runtime"
 
 	"math"
@@ -29,16 +28,6 @@ const (
 	windowHeight = 768
 )
 
-// ----------------------------------------------------------------------------
-func createBlockTypes() map[uint8]*vox.BlockType {
-	defs := make(map[uint8]*vox.BlockType)
-	defs[0x01] = &vox.BlockType{Color: vox.ColorRed.Copy()}   // red
-	defs[0x02] = &vox.BlockType{Color: vox.ColorGreen.Copy()} // green
-	defs[0x03] = &vox.BlockType{Color: vox.ColorBlue.Copy()}  // blue
-	defs[0x04] = &vox.BlockType{Color: vox.ColorTeal.Copy()}  // teal
-	return defs
-}
-
 type ChunkDemo struct {
 	camera   *vox.Camera
 	renderer *vox.WorldRenderer
@@ -52,11 +41,15 @@ func (d *ChunkDemo) Create() {
 	d.camera = vox.NewCamera(70, ratio, 0.01, 1000)
 
 	d.renderer = vox.NewWorldRenderer()
-	d.world = vox.NewWorld()
-
 	vox.Vox().AddMouseListener(d)
-
 	d.camera.Move(0, 0, 50)
+
+	d.world = vox.NewWorld()
+	d.world.BlockBank.AddType(&vox.BlockType{ID: 0x01, Color: vox.ColorRed.Copy()})
+	d.world.BlockBank.AddType(&vox.BlockType{ID: 0x02, Color: vox.ColorGreen.Copy()})
+	d.world.BlockBank.AddType(&vox.BlockType{ID: 0x03, Color: vox.ColorBlue.Copy()})
+	d.world.BlockBank.AddType(&vox.BlockType{ID: 0x04, Color: vox.ColorTeal.Copy()})
+	d.world.GenerateDebugWorld()
 
 	gl.Enable(gl.DEPTH_TEST)
 }
@@ -87,10 +80,8 @@ func (d *ChunkDemo) Resize(width, height int) {
 }
 
 func (d *ChunkDemo) MouseMoved(x, y float64) bool {
-	//fmt.Printf("Mouse position: %v,%v\n", x, y)
 	d.dx = (float32(x) - d.oldX) * 0.1
 	d.oldX = float32(x)
-	fmt.Println(d.dx)
 
 	return false
 }

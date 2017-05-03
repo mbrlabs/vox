@@ -27,12 +27,7 @@ type Chunk struct {
 }
 
 func NewChunk() *Chunk {
-	c := &Chunk{}
-	for i := 0; i < ChunkXYZ; i++ {
-		c.Blocks[i] = c.Blocks[i].Activate(true)
-	}
-
-	return c
+	return &Chunk{}
 }
 
 func (c *Chunk) Get(x, y, z int) Block {

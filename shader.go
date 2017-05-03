@@ -91,10 +91,6 @@ func NewShader(vertexPath, fragmentPath string, attribs []VertexAttribute) (*Sha
 		gl.BindAttribLocation(program, attrib.Position, gl.Str(attrib.Name+"\x00"))
 	}
 
-	//gl.BindAttribLocation(program, AttribIndexPositions, gl.Str("a_pos\x00"))
-	//gl.BindAttribLocation(program, AttribIndexUvs, gl.Str("a_uvs\x00"))
-	//gl.BindAttribLocation(program, AttribIndexNormals, gl.Str("a_norm\x00"))
-
 	gl.LinkProgram(program)
 	//gl.ValidateProgram(program)
 

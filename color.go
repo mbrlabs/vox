@@ -13,6 +13,10 @@
 
 package vox
 
+import (
+	"fmt"
+)
+
 var (
 	ColorWhite = NewColor(1, 1, 1, 1)
 	ColorBlack = NewColor(0, 0, 0, 1)
@@ -32,4 +36,8 @@ func NewColor(r, g, b, a float32) *Color {
 
 func (c *Color) Copy() *Color {
 	return NewColor(c.R, c.G, c.B, c.A)
+}
+
+func (c *Color) String() string {
+	return fmt.Sprintf("Color{%v,%v,%v, %v}", c.R, c.G, c.B, c.A)
 }

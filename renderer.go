@@ -16,7 +16,7 @@ func NewWorldRenderer() *WorldRenderer {
 	// solid shader
 	attribs := []VertexAttribute{
 		VertexAttribute{Position: AttribIndexPositions, Name: "a_pos"},
-		VertexAttribute{Position: AttribIndexUvs, Name: "a_uvs"},
+		VertexAttribute{Position: AttribIndexColor, Name: "a_color"},
 		VertexAttribute{Position: AttribIndexNormals, Name: "a_norm"},
 	}
 	ss, err := NewShader(WorldVertexShader, WorldFragmentShader, attribs)
