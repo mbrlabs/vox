@@ -36,7 +36,7 @@ type ChunkDemo struct {
 }
 
 func (d *ChunkDemo) Create() {
-	vox.Vox().AddKeyListener(d)
+	vox.Vox.AddKeyListener(d)
 
 	ratio := float32(windowWidth) / float32(windowHeight)
 	d.cam = vox.NewCamera(70, ratio, 0.01, 1000)
@@ -44,8 +44,8 @@ func (d *ChunkDemo) Create() {
 	d.cam.Update()
 
 	d.fpsController = vox.NewFpsController(d.cam)
-	vox.Vox().AddMouseListener(d.fpsController)
-	vox.Vox().AddKeyListener(d.fpsController)
+	vox.Vox.AddMouseListener(d.fpsController)
+	vox.Vox.AddKeyListener(d.fpsController)
 
 	d.world = vox.NewWorld()
 	d.world.BlockBank.AddType(&vox.BlockType{ID: 0x01, Color: vox.ColorRed.Copy()})
@@ -82,7 +82,7 @@ func (d *ChunkDemo) Resize(width, height int) {
 
 func (d *ChunkDemo) KeyDown(key glfw.Key) bool {
 	if key == glfw.KeyEscape {
-		vox.Vox().Exit()
+		vox.Vox.Exit()
 	}
 	return false
 }

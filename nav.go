@@ -80,8 +80,8 @@ func (c *FpsCameraController) KeyPressed(key glfw.Key) bool {
 }
 
 func (c *FpsCameraController) MouseMoved(x, y float64) bool {
-	dx := -Vox().DeltaMouseX() * c.MouseSensivity
-	dy := -Vox().DeltaMouseY() * c.MouseSensivity
+	dx := -Vox.DeltaMouseX() * c.MouseSensivity
+	dy := -Vox.DeltaMouseY() * c.MouseSensivity
 	c.cam.direction.Rotate(c.cam.up, dx)
 	c.tmp.SetVector3(c.cam.direction).Cross(c.cam.up).Norm()
 	c.cam.direction.Rotate(&c.tmp, dy)

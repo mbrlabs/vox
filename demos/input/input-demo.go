@@ -34,9 +34,8 @@ type InputDemo struct {
 }
 
 func (d *InputDemo) Create() {
-	vox := vox.Vox()
-	vox.AddMouseListener(d)
-	vox.AddKeyListener(d)
+	vox.Vox.AddMouseListener(d)
+	vox.Vox.AddKeyListener(d)
 }
 
 func (d *InputDemo) Dispose() {

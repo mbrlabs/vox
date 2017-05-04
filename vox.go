@@ -18,8 +18,8 @@ import (
 )
 
 var (
-	voxOnce     sync.Once
-	voxInstance *vox
+	voxOnce sync.Once
+	Vox     *vox
 )
 
 // ----------------------------------------------------------------------------
@@ -41,13 +41,8 @@ type vox struct {
 
 func setupVox(win *Window) {
 	voxOnce.Do(func() {
-		voxInstance = &vox{win: win}
+		Vox = &vox{win: win}
 	})
-}
-
-// Vox todo
-func Vox() *vox {
-	return voxInstance
 }
 
 func (v *vox) DeltaTime() float32 {
