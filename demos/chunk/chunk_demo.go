@@ -110,6 +110,7 @@ func main() {
 		Resizable:  false,
 		Fullscreen: false,
 		Vsync:      true,
+		//HiddenCursor: true,
 	})
 
 	window.Start(&ChunkDemo{})

@@ -16,12 +16,9 @@ package vox
 import "github.com/go-gl/glfw/v3.2/glfw"
 import "github.com/mbrlabs/vox/glm"
 
-const (
-	degreesPerPixel = 0.2
-)
-
 type FpsCameraController struct {
-	Velocity float32
+	MouseSensivity float32 // degress per pixel
+	Velocity       float32
 
 	cam         *Camera
 	pressedKeys map[glfw.Key]bool
@@ -30,9 +27,10 @@ type FpsCameraController struct {
 
 func NewFpsController(cam *Camera) *FpsCameraController {
 	return &FpsCameraController{
-		Velocity:    50,
-		cam:         cam,
-		pressedKeys: make(map[glfw.Key]bool),
+		MouseSensivity: 0.2,
+		Velocity:       50,
+		cam:            cam,
+		pressedKeys:    make(map[glfw.Key]bool),
 	}
 }
 
@@ -82,8 +80,8 @@ func (c *FpsCameraController) KeyPressed(key glfw.Key) bool {
 }
 
 func (c *FpsCameraController) MouseMoved(x, y float64) bool {
-	dx := -Vox().DeltaMouseX() * degreesPerPixel
-	dy := -Vox().DeltaMouseY() * degreesPerPixel
+	dx := -Vox().DeltaMouseX() * c.MouseSensivity
+	dy := -Vox().DeltaMouseY() * c.MouseSensivity
 	c.cam.direction.Rotate(c.cam.up, dx)
 	c.tmp.SetVector3(c.cam.direction).Cross(c.cam.up).Norm()
 	c.cam.direction.Rotate(&c.tmp, dy)

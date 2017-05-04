@@ -44,12 +44,13 @@ type MouseListener interface {
 
 // WindowConfig todo
 type WindowConfig struct {
-	Height     int
-	Width      int
-	Title      string
-	Resizable  bool
-	Fullscreen bool
-	Vsync      bool
+	Height       int
+	Width        int
+	Title        string
+	Resizable    bool
+	Fullscreen   bool
+	Vsync        bool
+	HiddenCursor bool
 }
 
 // ----------------------------------------------------------------------------
@@ -99,6 +100,10 @@ func NewWindow(config *WindowConfig) *Window {
 	// vsync
 	if config.Vsync {
 		glfw.SwapInterval(1)
+	}
+
+	if config.HiddenCursor {
+		window.SetInputMode(glfw.CursorMode, glfw.CursorDisabled)
 	}
 
 	// setup opengl
