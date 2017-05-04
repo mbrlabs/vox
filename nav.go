@@ -13,10 +13,71 @@
 
 package vox
 
-type FirstPersonCameraController struct {
-	cam *Camera
+import "github.com/go-gl/glfw/v3.2/glfw"
+
+type FpsCameraController struct {
+	Velocity float32
+
+	cam         *Camera
+	pressedKeys map[glfw.Key]bool
 }
 
-func NewFPSController(cam *Camera) *FirstPersonCameraController {
-	return &FirstPersonCameraController{cam: cam}
+func NewFpsController(cam *Camera) *FpsCameraController {
+	return &FpsCameraController{
+		Velocity:    1,
+		cam:         cam,
+		pressedKeys: make(map[glfw.Key]bool),
+	}
+}
+
+func (c *FpsCameraController) Update(delta float32) {
+	// left
+	if _, left := c.pressedKeys[glfw.KeyA]; left {
+		c.cam.Move(-c.Velocity, 0, 0)
+	}
+
+	// right
+	if _, right := c.pressedKeys[glfw.KeyD]; right {
+		c.cam.Move(c.Velocity, 0, 0)
+	}
+
+	// forward
+	if _, forward := c.pressedKeys[glfw.KeyW]; forward {
+		c.cam.Move(0, 0, -c.Velocity)
+	}
+
+	// backward
+	if _, back := c.pressedKeys[glfw.KeyS]; back {
+		c.cam.Move(0, 0, c.Velocity)
+	}
+
+	// up
+	if _, up := c.pressedKeys[glfw.KeyQ]; up {
+		c.cam.Move(0, c.Velocity, 0)
+	}
+
+	// down
+	if _, down := c.pressedKeys[glfw.KeyE]; down {
+		c.cam.Move(0, -c.Velocity, 0)
+	}
+
+	c.cam.Update()
+}
+
+func (c *FpsCameraController) KeyDown(key glfw.Key) bool {
+	c.pressedKeys[key] = true
+	return false
+}
+
+func (c *FpsCameraController) KeyUp(key glfw.Key) bool {
+	delete(c.pressedKeys, key)
+	return false
+}
+
+func (c *FpsCameraController) KeyPressed(key glfw.Key) bool {
+	return false
+}
+
+func (c *FpsCameraController) MouseMoved(x, y float64) bool {
+	return false
 }

@@ -16,8 +16,6 @@ package main
 import (
 	"runtime"
 
-	"math"
-
 	"github.com/go-gl/gl/v3.3-core/gl"
 	"github.com/mbrlabs/vox"
 )
@@ -29,20 +27,23 @@ const (
 )
 
 type ChunkDemo struct {
-	camera   *vox.Camera
-	renderer *vox.WorldRenderer
-	world    *vox.World
+	fpsController *vox.FpsCameraController
+	cam           *vox.Camera
+	renderer      *vox.WorldRenderer
+	world         *vox.World
 
 	oldX, dx float32
 }
 
 func (d *ChunkDemo) Create() {
 	ratio := float32(windowWidth) / float32(windowHeight)
-	d.camera = vox.NewCamera(70, ratio, 0.01, 1000)
+	d.cam = vox.NewCamera(70, ratio, 0.01, 1000)
+	d.cam.Move(0, 0, 50)
+	d.cam.Update()
 
-	d.renderer = vox.NewWorldRenderer()
-	vox.Vox().AddMouseListener(d)
-	d.camera.Move(0, 0, 50)
+	d.fpsController = vox.NewFpsController(d.cam)
+	vox.Vox().AddMouseListener(d.fpsController)
+	vox.Vox().AddKeyListener(d.fpsController)
 
 	d.world = vox.NewWorld()
 	d.world.BlockBank.AddType(&vox.BlockType{ID: 0x01, Color: vox.ColorRed.Copy()})
@@ -50,6 +51,8 @@ func (d *ChunkDemo) Create() {
 	d.world.BlockBank.AddType(&vox.BlockType{ID: 0x03, Color: vox.ColorBlue.Copy()})
 	d.world.BlockBank.AddType(&vox.BlockType{ID: 0x04, Color: vox.ColorTeal.Copy()})
 	d.world.GenerateDebugWorld()
+
+	d.renderer = vox.NewWorldRenderer()
 
 	gl.Enable(gl.DEPTH_TEST)
 }
@@ -59,11 +62,7 @@ func (d *ChunkDemo) Dispose() {
 }
 
 func (d *ChunkDemo) Update(delta float32) {
-	if math.Abs(float64(d.dx)) < 5 {
-		d.camera.Move(d.dx, 0, 0)
-	}
-
-	d.camera.Update()
+	d.fpsController.Update(delta)
 }
 
 func (d *ChunkDemo) Render(delta float32) {
@@ -72,18 +71,11 @@ func (d *ChunkDemo) Render(delta float32) {
 	gl.ClearColor(0.95, 0.95, 0.95, 0.0)
 
 	// render world
-	d.renderer.Render(d.camera, d.world)
+	d.renderer.Render(d.cam, d.world)
 }
 
 func (d *ChunkDemo) Resize(width, height int) {
 
-}
-
-func (d *ChunkDemo) MouseMoved(x, y float64) bool {
-	d.dx = (float32(x) - d.oldX) * 0.1
-	d.oldX = float32(x)
-
-	return false
 }
 
 // ----------------------------------------------------------------------------
