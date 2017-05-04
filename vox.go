@@ -50,6 +50,22 @@ func Vox() *vox {
 	return voxInstance
 }
 
+func (v *vox) DeltaTime() float32 {
+	return v.win.deltaTime
+}
+
+func (v *vox) DeltaMouseX() float32 {
+	return v.win.deltaX
+}
+
+func (v *vox) DeltaMouseY() float32 {
+	return v.win.deltaY
+}
+
+func (v *vox) Exit() {
+	v.win.exitRequested = true
+}
+
 // AddKeyListener todo
 func (v *vox) AddKeyListener(listener KeyListener) {
 	v.win.addKeyListener(listener)

@@ -56,11 +56,17 @@ type WindowConfig struct {
 
 // Window todo
 type Window struct {
-	glfwWindow *glfw.Window
-	lastFrame  int64
+	glfwWindow    *glfw.Window
+	lastFrame     int64
+	lastMouseX    float32
+	lastMouseY    float32
+	exitRequested bool
 
 	keyListeners   []KeyListener
 	mouseListeners []MouseListener
+	deltaTime      float32
+	deltaX         float32
+	deltaY         float32
 }
 
 // ----------------------------------------------------------------------------
@@ -103,7 +109,8 @@ func NewWindow(config *WindowConfig) *Window {
 	fmt.Println("Using OpenGL version", version)
 
 	win := &Window{
-		glfwWindow: window,
+		glfwWindow:    window,
+		exitRequested: false,
 	}
 	setupVox(win)
 	win.setupInputCallbacks()
@@ -122,12 +129,12 @@ func (w *Window) Start(game Game) {
 	game.Create()
 	w.lastFrame = time.Now().Unix()
 
-	for !w.glfwWindow.ShouldClose() {
+	for !w.glfwWindow.ShouldClose() && !w.exitRequested {
 		// game update
 		deltaNano := time.Now().UnixNano() - w.lastFrame
-		deltaSeconds := float32(float64(deltaNano) / 1000000000.0)
-		game.Update(deltaSeconds)
-		game.Render(deltaSeconds)
+		w.deltaTime = float32(float64(deltaNano) / 1000000000.0)
+		game.Update(w.deltaTime)
+		game.Render(w.deltaTime)
 		w.lastFrame = time.Now().UnixNano()
 
 		// glfw update
@@ -138,7 +145,20 @@ func (w *Window) Start(game Game) {
 
 func (w *Window) setupInputCallbacks() {
 	// mouse moved callback
+	first := true
 	w.glfwWindow.SetCursorPosCallback(func(win *glfw.Window, xpos, ypos float64) {
+		if first {
+			w.deltaX = 0
+			w.deltaY = 0
+		} else {
+			w.deltaX = w.lastMouseX - float32(xpos)
+			w.deltaY = w.lastMouseY - float32(ypos)
+		}
+
+		w.lastMouseX = float32(xpos)
+		w.lastMouseY = float32(ypos)
+		first = false
+
 		for _, listener := range w.mouseListeners {
 			if listener.MouseMoved(xpos, ypos) {
 				break

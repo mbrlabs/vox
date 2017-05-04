@@ -98,6 +98,21 @@ func (v *Vector3) DivVector3(other *Vector3) *Vector3 {
 	return v.Div(other.X, other.Y, other.Z)
 }
 
+// MulMat4 left-multiplies the vector by the given matrix, assuming the fourth (w) component of the vector is 1.
+func (v *Vector3) MulMat4(mat *Mat4) *Vector3 {
+	md := &mat.Data
+	return v.Set(
+		v.X*md[m00]+v.Y*md[m01]+v.Z*md[m02]+md[m03],
+		v.X*md[m10]+v.Y*md[m11]+v.Z*md[m12]+md[m13],
+		v.X*md[m20]+v.Y*md[m21]+v.Z*md[m22]+md[m23],
+	)
+}
+
+func (v *Vector3) Rotate(other *Vector3, degrees float32) *Vector3 {
+	tmpMat4.Rotation(degrees, other.X, other.Y, other.Z)
+	return v.MulMat4(tmpMat4)
+}
+
 func (v *Vector3) String() string {
 	return fmt.Sprintf("Vector3{%v, %v, %v}\n", v.X, v.Y, v.Z)
 }

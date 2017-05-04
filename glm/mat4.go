@@ -50,8 +50,11 @@ const m23 = 14
 const m33 = 15
 
 var (
-	tmpMat4 *Mat4    = NewMat4(false)
-	tmpVec3 *Vector3 = &Vector3{0, 0, 0}
+	tmpMat4   *Mat4    = NewMat4(false)
+	tmpVec3_1 *Vector3 = &Vector3{0, 0, 0}
+	tmpVec3_2 *Vector3 = &Vector3{0, 0, 0}
+	tmpVec3_3 *Vector3 = &Vector3{0, 0, 0}
+	tmpVec3_4 *Vector3 = &Vector3{0, 0, 0}
 )
 
 type Mat4 struct {
@@ -189,6 +192,30 @@ func (m *Mat4) Rotation(angle, xAxis, yAxis, zAxis float32) *Mat4 {
 func (m *Mat4) Rotate(angle, xAxis, yAxis, zAxis float32) *Mat4 {
 	tmpMat4.Rotation(angle, xAxis, yAxis, zAxis)
 	return m.Mul(tmpMat4)
+}
+
+func (m *Mat4) LookAt(position, target, up *Vector3) *Mat4 {
+	dir := tmpVec3_1.SetVector3(target).SubVector3(position)
+
+	tmpVec3_2.SetVector3(dir).Norm()
+	tmpVec3_3.SetVector3(dir).Norm()
+	tmpVec3_3.Cross(up).Norm()
+	tmpVec3_4.SetVector3(tmpVec3_3).Cross(tmpVec3_2).Norm()
+
+	m.Identity()
+	m.Data[m00] = tmpVec3_3.X
+	m.Data[m01] = tmpVec3_3.Y
+	m.Data[m02] = tmpVec3_3.Z
+	m.Data[m10] = tmpVec3_4.X
+	m.Data[m11] = tmpVec3_4.Y
+	m.Data[m12] = tmpVec3_4.Z
+	m.Data[m20] = -tmpVec3_2.X
+	m.Data[m21] = -tmpVec3_2.Y
+	m.Data[m22] = -tmpVec3_2.Z
+
+	m.Mul(tmpMat4.Translation(-position.X, -position.Y, -position.Z))
+
+	return m
 }
 
 func (m *Mat4) String() string {

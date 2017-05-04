@@ -22,7 +22,7 @@ const (
 )
 
 type Chunk struct {
-	Blocks [ChunkWidth * ChunkDepth * ChunkHeight]Block
+	Blocks [ChunkXYZ]Block
 	Mesh   *Vao
 }
 

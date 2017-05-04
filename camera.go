@@ -15,12 +15,18 @@ package vox
 
 import "github.com/mbrlabs/vox/glm"
 
+var (
+	tmpVec3 *glm.Vector3 = &glm.Vector3{0, 0, 0}
+)
+
 type Camera struct {
 	Combined   *glm.Mat4
 	projection *glm.Mat4
 	view       *glm.Mat4
-	position   *glm.Vector3
-	dirtyView  bool
+
+	position  *glm.Vector3
+	direction *glm.Vector3
+	up        *glm.Vector3
 }
 
 func NewCamera(fov, ratio, near, far float32) *Camera {
@@ -32,9 +38,10 @@ func NewCamera(fov, ratio, near, far float32) *Camera {
 	cam := &Camera{
 		Combined:   glm.NewMat4(false),
 		projection: p,
-		dirtyView:  true,
 		view:       v,
 		position:   &glm.Vector3{X: 0, Y: 0, Z: 0},
+		direction:  &glm.Vector3{X: 0, Y: 0, Z: -1},
+		up:         &glm.Vector3{X: 0, Y: 1, Z: 0},
 	}
 	cam.Update()
 	return cam
@@ -42,14 +49,12 @@ func NewCamera(fov, ratio, near, far float32) *Camera {
 
 func (cam *Camera) Move(x, y, z float32) {
 	cam.position.Add(x, y, z)
-	cam.dirtyView = true
 }
 
 func (cam *Camera) Update() {
-	if cam.dirtyView {
-		cam.view.Identity().Translate(-cam.position.X, -cam.position.Y, -cam.position.Z)
+	t := tmpVec3.SetVector3(cam.position).AddVector3(cam.direction)
+	cam.view.LookAt(cam.position, t, cam.up)
 
-		cam.Combined.Set(cam.projection.Data)
-		cam.Combined.Mul(cam.view)
-	}
+	cam.Combined.Set(cam.projection.Data)
+	cam.Combined.Mul(cam.view)
 }

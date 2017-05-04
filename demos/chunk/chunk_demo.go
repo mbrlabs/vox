@@ -14,10 +14,10 @@
 package main
 
 import (
-	"runtime"
-
 	"github.com/go-gl/gl/v3.3-core/gl"
+	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/mbrlabs/vox"
+	"runtime"
 )
 
 const (
@@ -36,6 +36,8 @@ type ChunkDemo struct {
 }
 
 func (d *ChunkDemo) Create() {
+	vox.Vox().AddKeyListener(d)
+
 	ratio := float32(windowWidth) / float32(windowHeight)
 	d.cam = vox.NewCamera(70, ratio, 0.01, 1000)
 	d.cam.Move(0, 0, 50)
@@ -76,6 +78,21 @@ func (d *ChunkDemo) Render(delta float32) {
 
 func (d *ChunkDemo) Resize(width, height int) {
 
+}
+
+func (d *ChunkDemo) KeyDown(key glfw.Key) bool {
+	if key == glfw.KeyEscape {
+		vox.Vox().Exit()
+	}
+	return false
+}
+
+func (d *ChunkDemo) KeyUp(key glfw.Key) bool {
+	return false
+}
+
+func (d *ChunkDemo) KeyPressed(key glfw.Key) bool {
+	return false
 }
 
 // ----------------------------------------------------------------------------

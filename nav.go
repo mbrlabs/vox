@@ -16,6 +16,10 @@ package vox
 import "github.com/go-gl/glfw/v3.2/glfw"
 import "github.com/mbrlabs/vox/glm"
 
+const (
+	degreesPerPixel = 0.2
+)
+
 type FpsCameraController struct {
 	Velocity float32
 
@@ -26,35 +30,37 @@ type FpsCameraController struct {
 
 func NewFpsController(cam *Camera) *FpsCameraController {
 	return &FpsCameraController{
-		Velocity:    1,
+		Velocity:    50,
 		cam:         cam,
 		pressedKeys: make(map[glfw.Key]bool),
 	}
 }
 
 func (c *FpsCameraController) Update(delta float32) {
+	progress := delta * c.Velocity
+
 	if _, left := c.pressedKeys[glfw.KeyA]; left {
-		c.tmp.Set(-c.Velocity, 0, 0)
+		c.tmp.SetVector3(c.cam.direction).Cross(c.cam.up).Norm().Scale(-progress)
 		c.cam.Move(c.tmp.X, c.tmp.Y, c.tmp.Z)
 	}
 	if _, right := c.pressedKeys[glfw.KeyD]; right {
-		c.tmp.Set(c.Velocity, 0, 0)
+		c.tmp.SetVector3(c.cam.direction).Cross(c.cam.up).Norm().Scale(progress)
 		c.cam.Move(c.tmp.X, c.tmp.Y, c.tmp.Z)
 	}
 	if _, forward := c.pressedKeys[glfw.KeyW]; forward {
-		c.tmp.Set(0, 0, -c.Velocity)
+		c.tmp.SetVector3(c.cam.direction).Norm().Scale(progress)
 		c.cam.Move(c.tmp.X, c.tmp.Y, c.tmp.Z)
 	}
 	if _, back := c.pressedKeys[glfw.KeyS]; back {
-		c.tmp.Set(0, 0, c.Velocity)
+		c.tmp.SetVector3(c.cam.direction).Norm().Scale(-progress)
 		c.cam.Move(c.tmp.X, c.tmp.Y, c.tmp.Z)
 	}
 	if _, up := c.pressedKeys[glfw.KeyQ]; up {
-		c.tmp.Set(0, c.Velocity, 0)
+		c.tmp.SetVector3(c.cam.up).Norm().Scale(progress)
 		c.cam.Move(c.tmp.X, c.tmp.Y, c.tmp.Z)
 	}
 	if _, down := c.pressedKeys[glfw.KeyE]; down {
-		c.tmp.Set(0, -c.Velocity, 0)
+		c.tmp.SetVector3(c.cam.up).Norm().Scale(-progress)
 		c.cam.Move(c.tmp.X, c.tmp.Y, c.tmp.Z)
 	}
 
@@ -76,5 +82,11 @@ func (c *FpsCameraController) KeyPressed(key glfw.Key) bool {
 }
 
 func (c *FpsCameraController) MouseMoved(x, y float64) bool {
+	dx := -Vox().DeltaMouseX() * degreesPerPixel
+	dy := -Vox().DeltaMouseY() * degreesPerPixel
+	c.cam.direction.Rotate(c.cam.up, dx)
+	c.tmp.SetVector3(c.cam.direction).Cross(c.cam.up).Norm()
+	c.cam.direction.Rotate(&c.tmp, dy)
+
 	return false
 }
