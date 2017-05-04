@@ -63,3 +63,43 @@ func TestVector3Div(t *testing.T) {
 	assert.ApproxEquals(t, v.Y, 8)
 	assert.ApproxEquals(t, v.Z, 4)
 }
+
+func TestVector3Len2(t *testing.T) {
+	v := &Vector3{15, -7, 9}
+	assert.ApproxEquals(t, v.Len2(), 355.0)
+
+	v.Set(-10, -123, -123)
+	assert.ApproxEquals(t, v.Len2(), 30358.0)
+
+	v.Set(1, 1, 1)
+	assert.ApproxEquals(t, v.Len2(), 3)
+}
+
+func TestVector3Norm(t *testing.T) {
+	v := &Vector3{1, 7, 9}
+	v.Norm()
+
+	assert.ApproxEquals(t, v.X, 0.0873704)
+	assert.ApproxEquals(t, v.Y, 0.6115928)
+	assert.ApproxEquals(t, v.Z, 0.7863336)
+
+	v.Set(0, 0, 0).Norm()
+	assert.ApproxEquals(t, v.X, 0)
+	assert.ApproxEquals(t, v.Y, 0)
+	assert.ApproxEquals(t, v.Z, 0)
+
+	v.Set(1, 1, 1).Norm()
+	assert.ApproxEquals(t, v.X, 0.57735026)
+	assert.ApproxEquals(t, v.Y, 0.57735026)
+	assert.ApproxEquals(t, v.Z, 0.57735026)
+}
+
+func TestVector3Cross(t *testing.T) {
+	v := &Vector3{1, 7, 102}
+	v2 := &Vector3{7, -97, 9}
+
+	v.Cross(v2)
+	assert.ApproxEquals(t, v.X, 9957.0)
+	assert.ApproxEquals(t, v.Y, 705.0)
+	assert.ApproxEquals(t, v.Z, -146.0)
+}

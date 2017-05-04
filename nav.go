@@ -14,12 +14,14 @@
 package vox
 
 import "github.com/go-gl/glfw/v3.2/glfw"
+import "github.com/mbrlabs/vox/glm"
 
 type FpsCameraController struct {
 	Velocity float32
 
 	cam         *Camera
 	pressedKeys map[glfw.Key]bool
+	tmp         glm.Vector3
 }
 
 func NewFpsController(cam *Camera) *FpsCameraController {
@@ -31,34 +33,29 @@ func NewFpsController(cam *Camera) *FpsCameraController {
 }
 
 func (c *FpsCameraController) Update(delta float32) {
-	// left
 	if _, left := c.pressedKeys[glfw.KeyA]; left {
-		c.cam.Move(-c.Velocity, 0, 0)
+		c.tmp.Set(-c.Velocity, 0, 0)
+		c.cam.Move(c.tmp.X, c.tmp.Y, c.tmp.Z)
 	}
-
-	// right
 	if _, right := c.pressedKeys[glfw.KeyD]; right {
-		c.cam.Move(c.Velocity, 0, 0)
+		c.tmp.Set(c.Velocity, 0, 0)
+		c.cam.Move(c.tmp.X, c.tmp.Y, c.tmp.Z)
 	}
-
-	// forward
 	if _, forward := c.pressedKeys[glfw.KeyW]; forward {
-		c.cam.Move(0, 0, -c.Velocity)
+		c.tmp.Set(0, 0, -c.Velocity)
+		c.cam.Move(c.tmp.X, c.tmp.Y, c.tmp.Z)
 	}
-
-	// backward
 	if _, back := c.pressedKeys[glfw.KeyS]; back {
-		c.cam.Move(0, 0, c.Velocity)
+		c.tmp.Set(0, 0, c.Velocity)
+		c.cam.Move(c.tmp.X, c.tmp.Y, c.tmp.Z)
 	}
-
-	// up
 	if _, up := c.pressedKeys[glfw.KeyQ]; up {
-		c.cam.Move(0, c.Velocity, 0)
+		c.tmp.Set(0, c.Velocity, 0)
+		c.cam.Move(c.tmp.X, c.tmp.Y, c.tmp.Z)
 	}
-
-	// down
 	if _, down := c.pressedKeys[glfw.KeyE]; down {
-		c.cam.Move(0, -c.Velocity, 0)
+		c.tmp.Set(0, -c.Velocity, 0)
+		c.cam.Move(c.tmp.X, c.tmp.Y, c.tmp.Z)
 	}
 
 	c.cam.Update()

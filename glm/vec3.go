@@ -14,6 +14,7 @@
 package glm
 
 import "fmt"
+import "math"
 
 type Vector3 struct {
 	X, Y, Z float32
@@ -57,6 +58,29 @@ func (v *Vector3) Mul(x, y, z float32) *Vector3 {
 	v.Y *= y
 	v.Z *= z
 	return v
+}
+
+func (v *Vector3) Scale(s float32) *Vector3 {
+	v.X *= s
+	v.Y *= s
+	v.Z *= s
+	return v
+}
+
+func (v *Vector3) Len2() float32 {
+	return v.X*v.X + v.Y*v.Y + v.Z*v.Z
+}
+
+func (v *Vector3) Norm() *Vector3 {
+	len2 := float64(v.Len2())
+	if len2 == 0 || len2 == 1 {
+		return v
+	}
+	return v.Scale(1.0 / float32(math.Sqrt(len2)))
+}
+
+func (v *Vector3) Cross(other *Vector3) *Vector3 {
+	return v.Set(v.Y*other.Z-v.Z*other.Y, v.Z*other.X-v.X*other.Z, v.X*other.Y-v.Y*other.X)
 }
 
 func (v *Vector3) MulVector3(other *Vector3) *Vector3 {
