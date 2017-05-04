@@ -15,18 +15,9 @@ package vox
 
 import (
 	"fmt"
-	"io/ioutil"
 	"strings"
 
 	"github.com/go-gl/gl/v3.3-core/gl"
-)
-
-const (
-	WireframeVertexShader   = "shaders/wire.vert"
-	WireframeFragmentShader = "shaders/wire.frag"
-
-	WorldVertexShader   = "shaders/world.vert"
-	WorldFragmentShader = "shaders/world.frag"
 )
 
 type VertexAttribute struct {
@@ -36,17 +27,9 @@ type VertexAttribute struct {
 
 type Shader struct {
 	ID       uint32
-	vertPath string
-	fragPath string
 }
 
-func compileShader(path string, shaderType uint32) (uint32, error) {
-	// read sources
-	source, err := ioutil.ReadFile(path)
-	if err != nil {
-		return 0, err
-	}
-
+func compileShader(source string, shaderType uint32) (uint32, error) {
 	shader := gl.CreateShader(shaderType)
 	csources, free := gl.Strs(string(source) + "\x00")
 	gl.ShaderSource(shader, 1, csources, nil)
@@ -63,21 +46,21 @@ func compileShader(path string, shaderType uint32) (uint32, error) {
 		log := strings.Repeat("\x00", int(logLength+1))
 		gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(log))
 
-		return 0, fmt.Errorf("Failed to compile %v: %v", path, log)
+		return 0, fmt.Errorf("Failed to compile %v: %v", source, log)
 	}
 
 	return shader, nil
 }
 
-func NewShader(vertexPath, fragmentPath string, attribs []VertexAttribute) (*Shader, error) {
+func NewShader(vertexSource, fragmentSource string, attribs []VertexAttribute) (*Shader, error) {
 	// compile vertex shader
-	vertexShader, err := compileShader(vertexPath, gl.VERTEX_SHADER)
+	vertexShader, err := compileShader(vertexSource, gl.VERTEX_SHADER)
 	if err != nil {
 		return nil, err
 	}
 
 	// compile fragment shader
-	fragmentShader, err := compileShader(fragmentPath, gl.FRAGMENT_SHADER)
+	fragmentShader, err := compileShader(fragmentSource, gl.FRAGMENT_SHADER)
 	if err != nil {
 		return nil, err
 	}
@@ -111,9 +94,7 @@ func NewShader(vertexPath, fragmentPath string, attribs []VertexAttribute) (*Sha
 	gl.DeleteShader(fragmentShader)
 
 	return &Shader{
-		ID:       program,
-		vertPath: vertexPath,
-		fragPath: vertexPath,
+		ID: program,
 	}, nil
 }
 

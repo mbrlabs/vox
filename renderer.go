@@ -15,6 +15,60 @@ package vox
 
 import "github.com/go-gl/gl/v3.3-core/gl"
 
+const worldVert = `
+#version 330 
+
+uniform mat4 u_mvp;
+
+in vec3 a_pos;
+in vec3 a_norm;
+in vec3 a_color;
+
+out vec3 color;
+
+void main() {
+    color = a_color;
+    gl_Position = u_mvp * vec4(a_pos, 1.0);
+}
+`
+
+const worldFrag = `
+#version 330
+
+in vec3 color;
+
+out vec4 outColor;
+
+void main() {
+	outColor = vec4(color, 1.0);
+}
+`
+
+const wireVert = `
+#version 330 
+
+const float SCALE_FACTOR = 1.01;
+
+uniform mat4 u_mvp;
+
+in vec3 a_pos;
+
+void main() {
+    vec3 scaledVertex = a_pos * SCALE_FACTOR;
+    gl_Position = u_mvp * vec4(scaledVertex, 1.0);
+}
+`
+
+const wireFrag = `
+#version 330
+
+out vec4 outColor;
+
+void main() {
+    outColor = vec4(0.0, 0.0, 0.0, 1.0);
+}
+`
+
 type WorldRenderer struct {
 	Disposable
 
@@ -32,7 +86,7 @@ func NewWorldRenderer() *WorldRenderer {
 		VertexAttribute{Position: AttribIndexColor, Name: "a_color"},
 		VertexAttribute{Position: AttribIndexNormals, Name: "a_norm"},
 	}
-	ss, err := NewShader(WorldVertexShader, WorldFragmentShader, attribs)
+	ss, err := NewShader(worldVert, worldFrag, attribs)
 	if err != nil {
 		panic(err)
 	}
@@ -41,7 +95,7 @@ func NewWorldRenderer() *WorldRenderer {
 	attribs = []VertexAttribute{
 		VertexAttribute{Position: AttribIndexPositions, Name: "a_pos"},
 	}
-	ws, err := NewShader(WireframeVertexShader, WireframeFragmentShader, attribs)
+	ws, err := NewShader(wireVert, wireFrag, attribs)
 	if err != nil {
 		panic(err)
 	}
