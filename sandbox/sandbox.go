@@ -15,7 +15,6 @@ package main
 
 import (
 	"github.com/go-gl/gl/v3.3-core/gl"
-	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/mbrlabs/vox"
 )
 
@@ -33,7 +32,7 @@ func (s *Sandbox) Create() {
 
 	ratio := float32(windowWidth) / float32(windowHeight)
 	s.cam = vox.NewCamera(70, ratio, 0.01, 1000)
-	s.cam.Move(0, 0, 50)
+	s.cam.Move(8, 15, 40)
 	s.cam.Update()
 
 	s.fpsController = vox.NewFpsController(s.cam)
@@ -73,17 +72,17 @@ func (s *Sandbox) Resize(width, height int) {
 
 }
 
-func (s *Sandbox) KeyDown(key glfw.Key) bool {
-	if key == glfw.KeyEscape {
+func (s *Sandbox) KeyDown(key vox.Key) bool {
+	if key == vox.KeyEscape {
 		vox.Vox.Exit()
 	}
 	return false
 }
 
-func (s *Sandbox) KeyUp(key glfw.Key) bool {
+func (s *Sandbox) KeyUp(key vox.Key) bool {
 	return false
 }
 
-func (s *Sandbox) KeyPressed(key glfw.Key) bool {
+func (s *Sandbox) KeyPressed(key vox.Key) bool {
 	return false
 }

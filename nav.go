@@ -13,7 +13,6 @@
 
 package vox
 
-import "github.com/go-gl/glfw/v3.2/glfw"
 import "github.com/mbrlabs/vox/glm"
 
 type FpsCameraController struct {
@@ -21,7 +20,7 @@ type FpsCameraController struct {
 	Velocity       float32
 
 	cam         *Camera
-	pressedKeys map[glfw.Key]bool
+	pressedKeys map[Key]bool
 	tmp         glm.Vector3
 }
 
@@ -30,34 +29,34 @@ func NewFpsController(cam *Camera) *FpsCameraController {
 		MouseSensivity: 0.2,
 		Velocity:       50,
 		cam:            cam,
-		pressedKeys:    make(map[glfw.Key]bool),
+		pressedKeys:    make(map[Key]bool),
 	}
 }
 
 func (c *FpsCameraController) Update(delta float32) {
 	progress := delta * c.Velocity
 
-	if _, left := c.pressedKeys[glfw.KeyA]; left {
+	if _, left := c.pressedKeys[KeyA]; left {
 		c.tmp.SetVector3(c.cam.direction).Cross(c.cam.up).Norm().Scale(-progress)
 		c.cam.Move(c.tmp.X, c.tmp.Y, c.tmp.Z)
 	}
-	if _, right := c.pressedKeys[glfw.KeyD]; right {
+	if _, right := c.pressedKeys[KeyD]; right {
 		c.tmp.SetVector3(c.cam.direction).Cross(c.cam.up).Norm().Scale(progress)
 		c.cam.Move(c.tmp.X, c.tmp.Y, c.tmp.Z)
 	}
-	if _, forward := c.pressedKeys[glfw.KeyW]; forward {
+	if _, forward := c.pressedKeys[KeyW]; forward {
 		c.tmp.SetVector3(c.cam.direction).Norm().Scale(progress)
 		c.cam.Move(c.tmp.X, c.tmp.Y, c.tmp.Z)
 	}
-	if _, back := c.pressedKeys[glfw.KeyS]; back {
+	if _, back := c.pressedKeys[KeyS]; back {
 		c.tmp.SetVector3(c.cam.direction).Norm().Scale(-progress)
 		c.cam.Move(c.tmp.X, c.tmp.Y, c.tmp.Z)
 	}
-	if _, up := c.pressedKeys[glfw.KeyQ]; up {
+	if _, up := c.pressedKeys[KeyQ]; up {
 		c.tmp.SetVector3(c.cam.up).Norm().Scale(progress)
 		c.cam.Move(c.tmp.X, c.tmp.Y, c.tmp.Z)
 	}
-	if _, down := c.pressedKeys[glfw.KeyE]; down {
+	if _, down := c.pressedKeys[KeyE]; down {
 		c.tmp.SetVector3(c.cam.up).Norm().Scale(-progress)
 		c.cam.Move(c.tmp.X, c.tmp.Y, c.tmp.Z)
 	}
@@ -65,17 +64,17 @@ func (c *FpsCameraController) Update(delta float32) {
 	c.cam.Update()
 }
 
-func (c *FpsCameraController) KeyDown(key glfw.Key) bool {
+func (c *FpsCameraController) KeyDown(key Key) bool {
 	c.pressedKeys[key] = true
 	return false
 }
 
-func (c *FpsCameraController) KeyUp(key glfw.Key) bool {
+func (c *FpsCameraController) KeyUp(key Key) bool {
 	delete(c.pressedKeys, key)
 	return false
 }
 
-func (c *FpsCameraController) KeyPressed(key glfw.Key) bool {
+func (c *FpsCameraController) KeyPressed(key Key) bool {
 	return false
 }
 

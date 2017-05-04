@@ -47,7 +47,7 @@ void main() {
 const wireVert = `
 #version 330 
 
-const float SCALE_FACTOR = 1.01;
+const float SCALE_FACTOR = 1.003;
 
 uniform mat4 u_mvp;
 

@@ -14,14 +14,10 @@
 package main
 
 import (
-	"runtime"
-
 	"fmt"
-
 	"github.com/go-gl/gl/v3.3-core/gl"
-	"github.com/go-gl/glfw/v3.2/glfw"
-
 	"github.com/mbrlabs/vox"
+	"runtime"
 )
 
 const (
@@ -62,17 +58,17 @@ func (d *InputDemo) MouseMoved(x, y float64) bool {
 	return false
 }
 
-func (d *InputDemo) KeyDown(key glfw.Key) bool {
+func (d *InputDemo) KeyDown(key vox.Key) bool {
 	fmt.Printf("Key down: %v\n", key)
 	return false
 }
 
-func (d *InputDemo) KeyUp(key glfw.Key) bool {
+func (d *InputDemo) KeyUp(key vox.Key) bool {
 	fmt.Printf("Key up: %v\n", key)
 	return false
 }
 
-func (d *InputDemo) KeyPressed(key glfw.Key) bool {
+func (d *InputDemo) KeyPressed(key vox.Key) bool {
 	fmt.Printf("Key pressed: %v\n", key)
 	return false
 }

@@ -26,7 +26,7 @@ type VertexAttribute struct {
 }
 
 type Shader struct {
-	ID       uint32
+	ID uint32
 }
 
 func compileShader(source string, shaderType uint32) (uint32, error) {
