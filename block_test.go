@@ -37,15 +37,19 @@ func TestBlockActive(t *testing.T) {
 }
 
 func TestBlockType(t *testing.T) {
-	var block Block = 7
+	grass := &BlockType{ID: 1, Color: nil}
+	water := &BlockType{ID: 2, Color: nil}
 
-	if block.TypeID() != 7 {
+	var block Block
+	block = block.ChangeType(grass)
+
+	if block.TypeID() != grass.ID {
 		t.Error()
 	}
 
 	block = block.Activate(true)
 
-	if block.TypeID() != 7 {
+	if block.TypeID() != grass.ID {
 		t.Error()
 	}
 
@@ -55,11 +59,18 @@ func TestBlockType(t *testing.T) {
 
 	block = block.Activate(false)
 
-	if block.TypeID() != 7 {
+	if block.TypeID() != grass.ID {
 		t.Error()
 	}
 
 	if block.Active() {
 		t.Error()
 	}
+
+	block = block.ChangeType(water)
+
+	if block.TypeID() != water.ID {
+		t.Error()
+	}
+
 }

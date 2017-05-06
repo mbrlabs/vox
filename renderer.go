@@ -82,9 +82,9 @@ type WorldRenderer struct {
 func NewWorldRenderer() *WorldRenderer {
 	// solid shader
 	attribs := []VertexAttribute{
-		VertexAttribute{Position: AttribIndexPositions, Name: "a_pos"},
-		VertexAttribute{Position: AttribIndexColor, Name: "a_color"},
-		VertexAttribute{Position: AttribIndexNormals, Name: "a_norm"},
+		{Position: AttribIndexPositions, Name: "a_pos"},
+		{Position: AttribIndexColor, Name: "a_color"},
+		{Position: AttribIndexNormals, Name: "a_norm"},
 	}
 	ss, err := NewShader(worldVert, worldFrag, attribs)
 	if err != nil {

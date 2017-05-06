@@ -70,6 +70,19 @@ func (sm *StupidMesher) addCube(x, y, z float32, block Block, bank *BlockBank, m
 		x, y+CubeSize, z-CubeSize,
 	)
 
+	// normals
+	// mesh.Normals = append(mesh.Normals,
+	// 	0, 0, 1,
+	// 	0, 0, 1,
+	// 	x, y, z,
+	// 	x, y, z,
+
+	// 	x, y, z,
+	// 	x, y, z,
+	// 	x, y, z,
+	// 	x, y, z,
+	// )
+
 	// indices
 	mesh.Indices = append(mesh.Indices,
 		// front

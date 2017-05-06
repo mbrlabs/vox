@@ -36,7 +36,7 @@ func (b Block) TypeID() uint8 {
 }
 
 func (b Block) ChangeType(t *BlockType) Block {
-	return Block(uint8(b) | t.ID)
+	return Block((uint8(b) & blockActiveMask) | t.ID)
 }
 
 type BlockType struct {
