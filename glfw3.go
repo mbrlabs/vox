@@ -269,9 +269,9 @@ func (w *Window) Start(game Game) {
 		// game update
 		deltaNano := time.Now().UnixNano() - w.lastFrame
 		w.deltaTime = float32(float64(deltaNano) / 1000000000.0)
+		w.lastFrame = time.Now().UnixNano()
 		game.Update(w.deltaTime)
 		game.Render(w.deltaTime)
-		w.lastFrame = time.Now().UnixNano()
 
 		// glfw update
 		w.glfwWindow.SwapBuffers()
