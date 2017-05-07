@@ -29,7 +29,7 @@ func NewWorld() *World {
 	return &World{
 		Chunks:    make(map[ChunkPosition]*Chunk),
 		mesher:    &CulledMesher{},
-		generator: &FlatGenerator{},
+		generator: &StairGenerator{},
 		BlockBank: NewBlockBank(),
 	}
 }

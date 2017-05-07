@@ -65,3 +65,29 @@ func (g *FlatGenerator) GenerateChunkAt(x, y, z int, bank *BlockBank) *Chunk {
 
 	return c
 }
+
+type StairGenerator struct {
+}
+
+func (g *StairGenerator) GenerateChunkAt(x, y, z int, bank *BlockBank) *Chunk {
+	c := NewChunk(x, y, z)
+
+	typeIdx := 0
+	for z := 0; z < ChunkDepth; z++ {
+		for x := 0; x < ChunkWidth; x++ {
+			for y := 0; y < ChunkHeight; y++ {
+				i := c.IndexAt(x, y, z)
+				c.Blocks[i] = c.Blocks[i].Activate(y <= x)
+
+				// block type (color)
+				if typeIdx >= len(bank.Types) {
+					typeIdx = 0
+				}
+				c.Blocks[i] = c.Blocks[i].ChangeType(bank.Types[typeIdx])
+				typeIdx++
+			}
+		}
+	}
+
+	return c
+}
