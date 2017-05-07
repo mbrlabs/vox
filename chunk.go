@@ -21,13 +21,20 @@ const (
 	ChunkXYZ    = ChunkXZ * ChunkHeight
 )
 
-type Chunk struct {
-	Blocks [ChunkXYZ]Block
-	Mesh   *Vao
+type ChunkPosition struct {
+	X, Y, Z int
 }
 
-func NewChunk() *Chunk {
-	return &Chunk{}
+type Chunk struct {
+	Position ChunkPosition
+	Blocks   [ChunkXYZ]Block
+	Mesh     *Vao
+}
+
+func NewChunk(x, y, z int) *Chunk {
+	return &Chunk{
+		Position: ChunkPosition{x, y, z},
+	}
 }
 
 func (c *Chunk) Get(x, y, z int) Block {

@@ -17,12 +17,13 @@ type World struct {
 	mesher    Mesher
 	generator Generator
 
-	Chunks    []*Chunk
 	BlockBank *BlockBank
+	Chunks    map[ChunkPosition]*Chunk
 }
 
 func NewWorld() *World {
 	return &World{
+		Chunks:    make(map[ChunkPosition]*Chunk),
 		mesher:    &StupidMesher{},
 		generator: &RandomGenerator{},
 		BlockBank: NewBlockBank(),
@@ -30,11 +31,16 @@ func NewWorld() *World {
 }
 
 func (w *World) GenerateDebugWorld() {
-	c := w.generator.GenerateChunkAt(0, 0, 0, w.BlockBank)
+	w.createChunk(0, 0, 0)
+	w.createChunk(-1, 0, 0)
+}
+
+func (w *World) createChunk(x, y, z int) {
+	c := w.generator.GenerateChunkAt(x, y, z, w.BlockBank)
 	mesh := w.mesher.Generate(c, w.BlockBank)
 	vao := NewVao()
-	vao.Load(mesh.Positions, mesh.Indices, mesh.Colors, mesh.Normals)
+	vao.Load(mesh.Positions, mesh.Indices, mesh.Colors)
 	c.Mesh = vao
 
-	w.Chunks = append(w.Chunks, c)
+	w.Chunks[c.Position] = c
 }

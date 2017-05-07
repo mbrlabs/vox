@@ -27,7 +27,6 @@ type Vao struct {
 	positionBuffer uint32
 	indexBuffer    uint32
 	colorBuffer    uint32
-	normalBuffer   uint32
 
 	IndexCount int32
 }
@@ -38,12 +37,11 @@ func NewVao() *Vao {
 	gl.GenBuffers(1, &vao.positionBuffer)
 	gl.GenBuffers(1, &vao.indexBuffer)
 	gl.GenBuffers(1, &vao.colorBuffer)
-	gl.GenBuffers(1, &vao.normalBuffer)
 
 	return vao
 }
 
-func (v *Vao) Load(positions []float32, indices []uint16, colors []float32, normals []float32) {
+func (v *Vao) Load(positions []float32, indices []uint16, colors []float32) {
 	gl.BindVertexArray(v.id)
 
 	// indices
@@ -66,9 +64,9 @@ func (v *Vao) Load(positions []float32, indices []uint16, colors []float32, norm
 	//gl.VertexAttribPointer(AttribIndexUvs, 3, gl.FLOAT, false, 0, gl.PtrOffset(0))
 
 	// normals
-	gl.BindBuffer(gl.ARRAY_BUFFER, v.normalBuffer)
-	gl.BufferData(gl.ARRAY_BUFFER, len(normals)*4, gl.Ptr(normals), gl.STATIC_DRAW)
-	gl.VertexAttribPointer(AttribIndexNormals, 3, gl.FLOAT, false, 0, gl.PtrOffset(0))
+	// gl.BindBuffer(gl.ARRAY_BUFFER, v.normalBuffer)
+	// gl.BufferData(gl.ARRAY_BUFFER, len(normals)*4, gl.Ptr(normals), gl.STATIC_DRAW)
+	// gl.VertexAttribPointer(AttribIndexNormals, 3, gl.FLOAT, false, 0, gl.PtrOffset(0))
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	gl.BindVertexArray(0)
@@ -81,11 +79,11 @@ func (v *Vao) Bind() {
 	gl.EnableVertexAttribArray(AttribIndexPositions)
 	gl.EnableVertexAttribArray(AttribIndexColor)
 	//gl.EnableVertexAttribArray(AttribIndexUvs)
-	gl.EnableVertexAttribArray(AttribIndexNormals)
+	//gl.EnableVertexAttribArray(AttribIndexNormals)
 }
 
 func (v *Vao) Unbind() {
-	gl.DisableVertexAttribArray(AttribIndexNormals)
+	//gl.DisableVertexAttribArray(AttribIndexNormals)
 	gl.EnableVertexAttribArray(AttribIndexColor)
 	//gl.DisableVertexAttribArray(AttribIndexUvs)
 	gl.DisableVertexAttribArray(AttribIndexPositions)

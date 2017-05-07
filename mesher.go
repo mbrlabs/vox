@@ -20,7 +20,6 @@ type Mesher interface {
 type RawMesh struct {
 	Positions []float32
 	Indices   []uint16
-	Normals   []float32
 	Colors    []float32
 }
 
@@ -30,21 +29,24 @@ type StupidMesher struct {
 func (sm *StupidMesher) Generate(chunk *Chunk, bank *BlockBank) *RawMesh {
 	mesh := &RawMesh{}
 
+	xOffset := float32(chunk.Position.X) * ChunkWidth
+	yOffset := float32(chunk.Position.Y) * ChunkHeight
+	zOffset := float32(chunk.Position.Z) * ChunkDepth
+
 	// positions
 	for x := 0; x < ChunkWidth; x++ {
 		for z := 0; z < ChunkDepth; z++ {
 			for y := 0; y < ChunkHeight; y++ {
 				block := chunk.Get(x, y, z)
 				if block.Active() {
-					//fmt.Println(x, y, z)
-					sm.addCube(float32(x), float32(y), float32(z), block, bank, mesh)
+					xx := xOffset + float32(x)
+					yy := yOffset + float32(y)
+					zz := zOffset + float32(z)
+					sm.addCube(xx, yy, zz, block, bank, mesh)
 				}
 			}
 		}
 	}
-
-	// TODO remove and generate real normals
-	mesh.Normals = append(mesh.Normals, 7)
 
 	return mesh
 }
@@ -69,19 +71,6 @@ func (sm *StupidMesher) addCube(x, y, z float32, block Block, bank *BlockBank, m
 		x+CubeSize, y+CubeSize, z-CubeSize,
 		x, y+CubeSize, z-CubeSize,
 	)
-
-	// normals
-	// mesh.Normals = append(mesh.Normals,
-	// 	0, 0, 1,
-	// 	0, 0, 1,
-	// 	x, y, z,
-	// 	x, y, z,
-
-	// 	x, y, z,
-	// 	x, y, z,
-	// 	x, y, z,
-	// 	x, y, z,
-	// )
 
 	// indices
 	mesh.Indices = append(mesh.Indices,

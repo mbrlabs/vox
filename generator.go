@@ -23,7 +23,7 @@ type RandomGenerator struct {
 }
 
 func (g *RandomGenerator) GenerateChunkAt(x, y, z int, bank *BlockBank) *Chunk {
-	c := NewChunk()
+	c := NewChunk(x, y, z)
 
 	typeIdx := 0
 
