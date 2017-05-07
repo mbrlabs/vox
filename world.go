@@ -13,6 +13,10 @@
 
 package vox
 
+import (
+	"fmt"
+)
+
 type World struct {
 	mesher    Mesher
 	generator Generator
@@ -24,8 +28,8 @@ type World struct {
 func NewWorld() *World {
 	return &World{
 		Chunks:    make(map[ChunkPosition]*Chunk),
-		mesher:    &StupidMesher{},
-		generator: &RandomGenerator{},
+		mesher:    &CulledMesher{},
+		generator: &FlatGenerator{},
 		BlockBank: NewBlockBank(),
 	}
 }
@@ -33,11 +37,14 @@ func NewWorld() *World {
 func (w *World) GenerateDebugWorld() {
 	w.createChunk(0, 0, 0)
 	w.createChunk(-1, 0, 0)
+	w.createChunk(1, 0, 0)
 }
 
 func (w *World) createChunk(x, y, z int) {
 	c := w.generator.GenerateChunkAt(x, y, z, w.BlockBank)
 	mesh := w.mesher.Generate(c, w.BlockBank)
+	fmt.Printf("verts: %v, indices: %v\n", len(mesh.Positions)/3, len(mesh.Indices))
+
 	vao := NewVao()
 	vao.Load(mesh.Positions, mesh.Indices, mesh.Colors)
 	c.Mesh = vao

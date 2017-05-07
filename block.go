@@ -16,6 +16,7 @@ package vox
 type Block uint8
 
 const (
+	BlockNil        = 0x00
 	blockActiveMask = 0x80 // 0b10000000
 	blockTypeMask   = 0x7F // 0b01111111
 )

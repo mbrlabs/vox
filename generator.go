@@ -26,14 +26,34 @@ func (g *RandomGenerator) GenerateChunkAt(x, y, z int, bank *BlockBank) *Chunk {
 	c := NewChunk(x, y, z)
 
 	typeIdx := 0
-
 	for i := 0; i < ChunkXYZ; i++ {
-		// active or inactive
+		//active or inactive
 		if rand.Int()%2 == 0 {
 			c.Blocks[i] = c.Blocks[i].Activate(true)
 		} else {
 			continue
 		}
+
+		// block type (color)
+		if typeIdx >= len(bank.Types) {
+			typeIdx = 0
+		}
+		c.Blocks[i] = c.Blocks[i].ChangeType(bank.Types[typeIdx])
+		typeIdx++
+	}
+
+	return c
+}
+
+type FlatGenerator struct {
+}
+
+func (g *FlatGenerator) GenerateChunkAt(x, y, z int, bank *BlockBank) *Chunk {
+	c := NewChunk(x, y, z)
+
+	typeIdx := 0
+	for i := 0; i < ChunkXYZ; i++ {
+		c.Blocks[i] = c.Blocks[i].Activate(true)
 
 		// block type (color)
 		if typeIdx >= len(bank.Types) {

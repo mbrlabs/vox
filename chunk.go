@@ -38,7 +38,12 @@ func NewChunk(x, y, z int) *Chunk {
 }
 
 func (c *Chunk) Get(x, y, z int) Block {
-	return c.Blocks[x+z*ChunkDepth+y*ChunkXZ]
+	idx := x + z*ChunkDepth + y*ChunkXZ
+	if x < 0 || y < 0 || z < 0 || x >= ChunkWidth || y >= ChunkHeight || z >= ChunkDepth {
+		return BlockNil
+	}
+
+	return c.Blocks[idx]
 }
 
 func (c *Chunk) Set(x, y, z int, block Block) {
