@@ -49,6 +49,10 @@ func (v *vox) DeltaTime() float32 {
 	return v.win.deltaTime
 }
 
+func (v *vox) Fps() int {
+	return v.win.fps
+}
+
 func (v *vox) DeltaMouseX() float32 {
 	return v.win.deltaX
 }

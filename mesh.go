@@ -29,12 +29,12 @@ var (
 )
 
 func createChunkIndexBuffer() {
-	// TODO make dynamic/resizable if a chunks needs more indices
+	// allocate max possible buffer for the given chunk size
 	var verts uint16
-	quads := 16000
+	faces := ChunkXYZ * 6
 
 	indices := make([]uint16, 0)
-	for i := 0; i < quads; i++ {
+	for i := 0; i < faces; i++ {
 		verts += 4
 		indices = append(indices,
 			verts-4, verts-3, verts-2,

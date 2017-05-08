@@ -23,8 +23,9 @@ type Sandbox struct {
 	cam           *vox.Camera
 	renderer      *vox.WorldRenderer
 	world         *vox.World
+	oldX, dx      float32
 
-	oldX, dx float32
+	fpsLogger *vox.FpsLogger
 }
 
 func (s *Sandbox) Create() {
@@ -49,6 +50,7 @@ func (s *Sandbox) Create() {
 	s.world.CreateChunk(1, 0, 0)
 
 	s.renderer = vox.NewWorldRenderer()
+	s.fpsLogger = &vox.FpsLogger{}
 
 	gl.Enable(gl.DEPTH_TEST)
 }
@@ -59,6 +61,7 @@ func (s *Sandbox) Dispose() {
 
 func (s *Sandbox) Update(delta float32) {
 	s.fpsController.Update(delta)
+	s.fpsLogger.Log(delta)
 }
 
 func (s *Sandbox) Render(delta float32) {

@@ -185,17 +185,21 @@ type WindowConfig struct {
 
 // Window todo
 type Window struct {
-	glfwWindow    *glfw.Window
-	lastFrame     int64
-	lastMouseX    float32
-	lastMouseY    float32
-	exitRequested bool
+	glfwWindow *glfw.Window
 
+	lastFrame    int64
+	fpsTime      float32
+	fps          int
+	frameCounter int
+
+	exitRequested  bool
 	keyListeners   []KeyListener
 	mouseListeners []MouseListener
 	deltaTime      float32
 	deltaX         float32
 	deltaY         float32
+	lastMouseX     float32
+	lastMouseY     float32
 
 	keyMap [glfw.KeyLast + 1]Key
 }
@@ -266,12 +270,23 @@ func (w *Window) Start(game Game) {
 	w.lastFrame = time.Now().Unix()
 
 	for !w.glfwWindow.ShouldClose() && !w.exitRequested {
-		// game update
+		// update delta time
 		deltaNano := time.Now().UnixNano() - w.lastFrame
 		w.deltaTime = float32(float64(deltaNano) / 1000000000.0)
 		w.lastFrame = time.Now().UnixNano()
+
+		// update & render game
 		game.Update(w.deltaTime)
 		game.Render(w.deltaTime)
+
+		// update fps
+		w.frameCounter++
+		w.fpsTime += w.deltaTime
+		if w.fpsTime >= 1.0 {
+			w.fps = w.frameCounter
+			w.fpsTime = 0
+			w.frameCounter = 0
+		}
 
 		// glfw update
 		w.glfwWindow.SwapBuffers()
