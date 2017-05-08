@@ -44,7 +44,9 @@ func (s *Sandbox) Create() {
 	s.world.BlockBank.AddType(&vox.BlockType{ID: 0x02, Color: vox.ColorGreen.Copy()})
 	s.world.BlockBank.AddType(&vox.BlockType{ID: 0x03, Color: vox.ColorBlue.Copy()})
 	s.world.BlockBank.AddType(&vox.BlockType{ID: 0x04, Color: vox.ColorTeal.Copy()})
-	s.world.GenerateDebugWorld()
+	s.world.CreateChunk(0, 0, 0)
+	s.world.CreateChunk(-1, 0, 0)
+	s.world.CreateChunk(1, 0, 0)
 
 	s.renderer = vox.NewWorldRenderer()
 

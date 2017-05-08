@@ -34,20 +34,14 @@ func NewWorld() *World {
 	}
 }
 
-func (w *World) GenerateDebugWorld() {
-	w.createChunk(0, 0, 0)
-	w.createChunk(-1, 0, 0)
-	w.createChunk(1, 0, 0)
-}
+func (w *World) CreateChunk(x, y, z int) {
+	chunk := w.generator.GenerateChunkAt(x, y, z, w.BlockBank)
+	meshData := w.mesher.Generate(chunk, w.BlockBank)
+	fmt.Printf("verts: %v, indices: %v\n", len(meshData.Positions)/3, len(meshData.Indices))
 
-func (w *World) createChunk(x, y, z int) {
-	c := w.generator.GenerateChunkAt(x, y, z, w.BlockBank)
-	mesh := w.mesher.Generate(c, w.BlockBank)
-	fmt.Printf("verts: %v, indices: %v\n", len(mesh.Positions)/3, len(mesh.Indices))
+	mesh := NewMesh()
+	mesh.Load(meshData)
+	chunk.Mesh = mesh
 
-	vao := NewVao()
-	vao.Load(mesh.Positions, mesh.Indices, mesh.Colors)
-	c.Mesh = vao
-
-	w.Chunks[c.Position] = c
+	w.Chunks[chunk.Position] = chunk
 }

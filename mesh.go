@@ -17,13 +17,18 @@ import "github.com/go-gl/gl/v3.3-core/gl"
 
 const (
 	AttribIndexPositions = 0
-	//AttribIndexUvs       = 1
-	AttribIndexColor   = 1
-	AttribIndexNormals = 2
+	AttribIndexColor     = 1
+	AttribIndexNormals   = 2
 )
 
-type Vao struct {
-	id             uint32
+type MeshData struct {
+	Positions []float32
+	Indices   []uint16
+	Colors    []float32
+}
+
+type Mesh struct {
+	vao            uint32
 	positionBuffer uint32
 	indexBuffer    uint32
 	colorBuffer    uint32
@@ -31,66 +36,56 @@ type Vao struct {
 	IndexCount int32
 }
 
-func NewVao() *Vao {
-	vao := &Vao{}
-	gl.GenVertexArrays(1, &vao.id)
-	gl.GenBuffers(1, &vao.positionBuffer)
-	gl.GenBuffers(1, &vao.indexBuffer)
-	gl.GenBuffers(1, &vao.colorBuffer)
+func NewMesh() *Mesh {
+	mesh := &Mesh{}
+	gl.GenVertexArrays(1, &mesh.vao)
+	gl.GenBuffers(1, &mesh.positionBuffer)
+	gl.GenBuffers(1, &mesh.indexBuffer)
+	gl.GenBuffers(1, &mesh.colorBuffer)
 
-	return vao
+	return mesh
 }
 
-func (v *Vao) Load(positions []float32, indices []uint16, colors []float32) {
-	gl.BindVertexArray(v.id)
+func (m *Mesh) Load(data *MeshData) {
+	gl.BindVertexArray(m.vao)
+
+	indices := data.Indices
+	positions := data.Positions
+	colors := data.Colors
 
 	// indices
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, v.indexBuffer)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.indexBuffer)
 	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(indices)*2, gl.Ptr(indices), gl.STATIC_DRAW)
 
 	// positions
-	gl.BindBuffer(gl.ARRAY_BUFFER, v.positionBuffer)
+	gl.BindBuffer(gl.ARRAY_BUFFER, m.positionBuffer)
 	gl.BufferData(gl.ARRAY_BUFFER, len(positions)*4, gl.Ptr(positions), gl.STATIC_DRAW)
 	gl.VertexAttribPointer(AttribIndexPositions, 3, gl.FLOAT, false, 0, gl.PtrOffset(0))
 
 	// colors
-	gl.BindBuffer(gl.ARRAY_BUFFER, v.colorBuffer)
+	gl.BindBuffer(gl.ARRAY_BUFFER, m.colorBuffer)
 	gl.BufferData(gl.ARRAY_BUFFER, len(colors)*4, gl.Ptr(colors), gl.STATIC_DRAW)
 	gl.VertexAttribPointer(AttribIndexColor, 3, gl.FLOAT, false, 0, gl.PtrOffset(0))
-
-	// uvs
-	//gl.BindBuffer(gl.ARRAY_BUFFER, v.uvBuffer)
-	//gl.BufferData(gl.ARRAY_BUFFER, len(uvs)*4, gl.Ptr(uvs), gl.STATIC_DRAW)
-	//gl.VertexAttribPointer(AttribIndexUvs, 3, gl.FLOAT, false, 0, gl.PtrOffset(0))
-
-	// normals
-	// gl.BindBuffer(gl.ARRAY_BUFFER, v.normalBuffer)
-	// gl.BufferData(gl.ARRAY_BUFFER, len(normals)*4, gl.Ptr(normals), gl.STATIC_DRAW)
-	// gl.VertexAttribPointer(AttribIndexNormals, 3, gl.FLOAT, false, 0, gl.PtrOffset(0))
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	gl.BindVertexArray(0)
 
-	v.IndexCount = int32(len(indices))
+	m.IndexCount = int32(len(indices))
 }
 
-func (v *Vao) Bind() {
-	gl.BindVertexArray(v.id)
+func (m *Mesh) Bind() {
+	gl.BindVertexArray(m.vao)
 	gl.EnableVertexAttribArray(AttribIndexPositions)
 	gl.EnableVertexAttribArray(AttribIndexColor)
-	//gl.EnableVertexAttribArray(AttribIndexUvs)
-	//gl.EnableVertexAttribArray(AttribIndexNormals)
 }
 
-func (v *Vao) Unbind() {
-	//gl.DisableVertexAttribArray(AttribIndexNormals)
+func (m *Mesh) Unbind() {
 	gl.EnableVertexAttribArray(AttribIndexColor)
-	//gl.DisableVertexAttribArray(AttribIndexUvs)
 	gl.DisableVertexAttribArray(AttribIndexPositions)
 	gl.BindVertexArray(0)
 }
 
-func (v *Vao) Dispose() {
+func (m *Mesh) Dispose() {
 	// TODO delete buffers as well?
-	gl.DeleteVertexArrays(1, &v.id)
+	gl.DeleteVertexArrays(1, &m.vao)
 }

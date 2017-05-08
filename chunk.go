@@ -28,7 +28,7 @@ type ChunkPosition struct {
 type Chunk struct {
 	Position ChunkPosition
 	Blocks   [ChunkXYZ]Block
-	Mesh     *Vao
+	Mesh     *Mesh
 }
 
 func NewChunk(x, y, z int) *Chunk {

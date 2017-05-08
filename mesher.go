@@ -16,21 +16,15 @@ package vox
 const CubeSize = 1.0
 
 type Mesher interface {
-	Generate(chunk *Chunk, bank *BlockBank) *RawMesh
-}
-
-type RawMesh struct {
-	Positions []float32
-	Indices   []uint16
-	Colors    []float32
+	Generate(chunk *Chunk, bank *BlockBank) *MeshData
 }
 
 // ----------------------------------------------------------------------------
 type StupidMesher struct {
 }
 
-func (sm *StupidMesher) Generate(chunk *Chunk, bank *BlockBank) *RawMesh {
-	mesh := &RawMesh{}
+func (sm *StupidMesher) Generate(chunk *Chunk, bank *BlockBank) *MeshData {
+	data := &MeshData{}
 
 	xOffset := float32(chunk.Position.X) * ChunkWidth
 	yOffset := float32(chunk.Position.Y) * ChunkHeight
@@ -45,21 +39,21 @@ func (sm *StupidMesher) Generate(chunk *Chunk, bank *BlockBank) *RawMesh {
 					xx := xOffset + float32(x)
 					yy := yOffset + float32(y)
 					zz := zOffset + float32(z)
-					sm.addCube(xx, yy, zz, block, bank, mesh)
+					sm.addCube(xx, yy, zz, block, bank, data)
 				}
 			}
 		}
 	}
 
-	return mesh
+	return data
 }
 
-func (sm *StupidMesher) addCube(x, y, z float32, block Block, bank *BlockBank, mesh *RawMesh) {
+func (sm *StupidMesher) addCube(x, y, z float32, block Block, bank *BlockBank, data *MeshData) {
 	// TODO check for overflow
-	idxOffset := uint16(len(mesh.Positions) / 3)
+	idxOffset := uint16(len(data.Positions) / 3)
 
 	// positions
-	mesh.Positions = append(mesh.Positions,
+	data.Positions = append(data.Positions,
 		// front positions
 		x, y, z,
 		x+CubeSize, y, z,
@@ -74,7 +68,7 @@ func (sm *StupidMesher) addCube(x, y, z float32, block Block, bank *BlockBank, m
 	)
 
 	// indices
-	mesh.Indices = append(mesh.Indices,
+	data.Indices = append(data.Indices,
 		// front
 		idxOffset, idxOffset+1, idxOffset+2,
 		idxOffset+2, idxOffset+3, idxOffset,
@@ -98,7 +92,7 @@ func (sm *StupidMesher) addCube(x, y, z float32, block Block, bank *BlockBank, m
 	// colors
 	blockType := bank.TypeOf(block)
 	for i := 0; i < 8; i++ {
-		mesh.Colors = append(mesh.Colors, blockType.Color.R, blockType.Color.G, blockType.Color.B)
+		data.Colors = append(data.Colors, blockType.Color.R, blockType.Color.G, blockType.Color.B)
 	}
 
 }
@@ -108,8 +102,8 @@ func (sm *StupidMesher) addCube(x, y, z float32, block Block, bank *BlockBank, m
 type CulledMesher struct {
 }
 
-func (cm *CulledMesher) Generate(chunk *Chunk, bank *BlockBank) *RawMesh {
-	mesh := &RawMesh{}
+func (cm *CulledMesher) Generate(chunk *Chunk, bank *BlockBank) *MeshData {
+	data := &MeshData{}
 
 	xOffset := float32(chunk.Position.X) * ChunkWidth
 	yOffset := float32(chunk.Position.Y) * ChunkHeight
@@ -143,58 +137,58 @@ func (cm *CulledMesher) Generate(chunk *Chunk, bank *BlockBank) *RawMesh {
 
 				// add new faces if adjaciant neighbor is inactive
 				if left == BlockNil || !left.Active() {
-					cm.addLeftFace(xx, yy, zz, mesh)
-					cm.addFaceColors(blockType, mesh)
-					cm.addFaceIndices(mesh)
+					cm.addLeftFace(xx, yy, zz, data)
+					cm.addFaceColors(blockType, data)
+					cm.addFaceIndices(data)
 				}
 				if right == BlockNil || !right.Active() {
-					cm.addRightFace(xx, yy, zz, mesh)
-					cm.addFaceColors(blockType, mesh)
-					cm.addFaceIndices(mesh)
+					cm.addRightFace(xx, yy, zz, data)
+					cm.addFaceColors(blockType, data)
+					cm.addFaceIndices(data)
 				}
 				if top == BlockNil || !top.Active() {
-					cm.addTopFace(xx, yy, zz, mesh)
-					cm.addFaceColors(blockType, mesh)
-					cm.addFaceIndices(mesh)
+					cm.addTopFace(xx, yy, zz, data)
+					cm.addFaceColors(blockType, data)
+					cm.addFaceIndices(data)
 				}
 				if bottom == BlockNil || !bottom.Active() {
-					cm.addBottomFace(xx, yy, zz, mesh)
-					cm.addFaceColors(blockType, mesh)
-					cm.addFaceIndices(mesh)
+					cm.addBottomFace(xx, yy, zz, data)
+					cm.addFaceColors(blockType, data)
+					cm.addFaceIndices(data)
 				}
 				if front == BlockNil || !front.Active() {
-					cm.addFrontFace(xx, yy, zz, mesh)
-					cm.addFaceColors(blockType, mesh)
-					cm.addFaceIndices(mesh)
+					cm.addFrontFace(xx, yy, zz, data)
+					cm.addFaceColors(blockType, data)
+					cm.addFaceIndices(data)
 				}
 				if back == BlockNil || !back.Active() {
-					cm.addBackFace(xx, yy, zz, mesh)
-					cm.addFaceColors(blockType, mesh)
-					cm.addFaceIndices(mesh)
+					cm.addBackFace(xx, yy, zz, data)
+					cm.addFaceColors(blockType, data)
+					cm.addFaceIndices(data)
 				}
 			}
 		}
 	}
 
-	return mesh
+	return data
 }
 
-func (cm *CulledMesher) addFaceIndices(mesh *RawMesh) {
-	verts := uint16(len(mesh.Positions) / 3)
-	mesh.Indices = append(mesh.Indices,
+func (cm *CulledMesher) addFaceIndices(data *MeshData) {
+	verts := uint16(len(data.Positions) / 3)
+	data.Indices = append(data.Indices,
 		verts-4, verts-3, verts-2,
 		verts-2, verts-1, verts-4,
 	)
 }
 
-func (cm *CulledMesher) addFaceColors(blockType *BlockType, mesh *RawMesh) {
+func (cm *CulledMesher) addFaceColors(blockType *BlockType, data *MeshData) {
 	for i := 0; i < 4; i++ {
-		mesh.Colors = append(mesh.Colors, blockType.Color.R, blockType.Color.G, blockType.Color.B)
+		data.Colors = append(data.Colors, blockType.Color.R, blockType.Color.G, blockType.Color.B)
 	}
 }
 
-func (cm *CulledMesher) addLeftFace(x, y, z float32, mesh *RawMesh) {
-	mesh.Positions = append(mesh.Positions,
+func (cm *CulledMesher) addLeftFace(x, y, z float32, data *MeshData) {
+	data.Positions = append(data.Positions,
 		x, y, z-CubeSize,
 		x, y, z,
 		x, y+CubeSize, z,
@@ -202,8 +196,8 @@ func (cm *CulledMesher) addLeftFace(x, y, z float32, mesh *RawMesh) {
 	)
 }
 
-func (cm *CulledMesher) addRightFace(x, y, z float32, mesh *RawMesh) {
-	mesh.Positions = append(mesh.Positions,
+func (cm *CulledMesher) addRightFace(x, y, z float32, data *MeshData) {
+	data.Positions = append(data.Positions,
 		x+CubeSize, y, z,
 		x+CubeSize, y, z-CubeSize,
 		x+CubeSize, y+CubeSize, z-CubeSize,
@@ -211,8 +205,8 @@ func (cm *CulledMesher) addRightFace(x, y, z float32, mesh *RawMesh) {
 	)
 }
 
-func (cm *CulledMesher) addTopFace(x, y, z float32, mesh *RawMesh) {
-	mesh.Positions = append(mesh.Positions,
+func (cm *CulledMesher) addTopFace(x, y, z float32, data *MeshData) {
+	data.Positions = append(data.Positions,
 		x, y+CubeSize, z,
 		x+CubeSize, y+CubeSize, z,
 		x+CubeSize, y+CubeSize, z-CubeSize,
@@ -220,8 +214,8 @@ func (cm *CulledMesher) addTopFace(x, y, z float32, mesh *RawMesh) {
 	)
 }
 
-func (cm *CulledMesher) addBottomFace(x, y, z float32, mesh *RawMesh) {
-	mesh.Positions = append(mesh.Positions,
+func (cm *CulledMesher) addBottomFace(x, y, z float32, data *MeshData) {
+	data.Positions = append(data.Positions,
 		x, y, z,
 		x+CubeSize, y, z,
 		x+CubeSize, y, z-CubeSize,
@@ -229,8 +223,8 @@ func (cm *CulledMesher) addBottomFace(x, y, z float32, mesh *RawMesh) {
 	)
 }
 
-func (cm *CulledMesher) addFrontFace(x, y, z float32, mesh *RawMesh) {
-	mesh.Positions = append(mesh.Positions,
+func (cm *CulledMesher) addFrontFace(x, y, z float32, data *MeshData) {
+	data.Positions = append(data.Positions,
 		x, y, z,
 		x+CubeSize, y, z,
 		x+CubeSize, y+CubeSize, z,
@@ -238,8 +232,8 @@ func (cm *CulledMesher) addFrontFace(x, y, z float32, mesh *RawMesh) {
 	)
 }
 
-func (cm *CulledMesher) addBackFace(x, y, z float32, mesh *RawMesh) {
-	mesh.Positions = append(mesh.Positions,
+func (cm *CulledMesher) addBackFace(x, y, z float32, data *MeshData) {
+	data.Positions = append(data.Positions,
 		x+CubeSize, y, z-CubeSize,
 		x+CubeSize, y+CubeSize, z-CubeSize,
 		x, y+CubeSize, z-CubeSize,
