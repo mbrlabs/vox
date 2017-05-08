@@ -20,84 +20,6 @@ type Mesher interface {
 }
 
 // ----------------------------------------------------------------------------
-type StupidMesher struct {
-}
-
-func (sm *StupidMesher) Generate(chunk *Chunk, bank *BlockBank) *MeshData {
-	data := &MeshData{}
-
-	xOffset := float32(chunk.Position.X) * ChunkWidth
-	yOffset := float32(chunk.Position.Y) * ChunkHeight
-	zOffset := float32(chunk.Position.Z) * ChunkDepth
-
-	// positions
-	for x := 0; x < ChunkWidth; x++ {
-		for z := 0; z < ChunkDepth; z++ {
-			for y := 0; y < ChunkHeight; y++ {
-				block := chunk.Get(x, y, z)
-				if block.Active() {
-					xx := xOffset + float32(x)
-					yy := yOffset + float32(y)
-					zz := zOffset + float32(z)
-					sm.addCube(xx, yy, zz, block, bank, data)
-				}
-			}
-		}
-	}
-
-	return data
-}
-
-func (sm *StupidMesher) addCube(x, y, z float32, block Block, bank *BlockBank, data *MeshData) {
-	// TODO check for overflow
-	idxOffset := uint16(len(data.Positions) / 3)
-
-	// positions
-	data.Positions = append(data.Positions,
-		// front positions
-		x, y, z,
-		x+CubeSize, y, z,
-		x+CubeSize, y+CubeSize, z,
-		x, y+CubeSize, z,
-
-		// back positions
-		x, y, z-CubeSize,
-		x+CubeSize, y, z-CubeSize,
-		x+CubeSize, y+CubeSize, z-CubeSize,
-		x, y+CubeSize, z-CubeSize,
-	)
-
-	// indices
-	data.Indices = append(data.Indices,
-		// front
-		idxOffset, idxOffset+1, idxOffset+2,
-		idxOffset+2, idxOffset+3, idxOffset,
-		// back
-		idxOffset+5, idxOffset+4, idxOffset+7,
-		idxOffset+7, idxOffset+6, idxOffset+5,
-		// top
-		idxOffset+3, idxOffset+2, idxOffset+6,
-		idxOffset+6, idxOffset+7, idxOffset+3,
-		// bottom
-		idxOffset, idxOffset+1, idxOffset+5,
-		idxOffset+5, idxOffset+4, idxOffset,
-		// left
-		idxOffset+4, idxOffset, idxOffset+3,
-		idxOffset+3, idxOffset+7, idxOffset+4,
-		// right
-		idxOffset+1, idxOffset+5, idxOffset+6,
-		idxOffset+6, idxOffset+2, idxOffset+1,
-	)
-
-	// colors
-	blockType := bank.TypeOf(block)
-	for i := 0; i < 8; i++ {
-		data.Colors = append(data.Colors, blockType.Color.R, blockType.Color.G, blockType.Color.B)
-	}
-
-}
-
-// ----------------------------------------------------------------------------
 
 type CulledMesher struct {
 }
@@ -139,46 +61,37 @@ func (cm *CulledMesher) Generate(chunk *Chunk, bank *BlockBank) *MeshData {
 				if left == BlockNil || !left.Active() {
 					cm.addLeftFace(xx, yy, zz, data)
 					cm.addFaceColors(blockType, data)
-					cm.addFaceIndices(data)
+					data.IndexCount += 6
 				}
 				if right == BlockNil || !right.Active() {
 					cm.addRightFace(xx, yy, zz, data)
 					cm.addFaceColors(blockType, data)
-					cm.addFaceIndices(data)
+					data.IndexCount += 6
 				}
 				if top == BlockNil || !top.Active() {
 					cm.addTopFace(xx, yy, zz, data)
 					cm.addFaceColors(blockType, data)
-					cm.addFaceIndices(data)
+					data.IndexCount += 6
 				}
 				if bottom == BlockNil || !bottom.Active() {
 					cm.addBottomFace(xx, yy, zz, data)
 					cm.addFaceColors(blockType, data)
-					cm.addFaceIndices(data)
+					data.IndexCount += 6
 				}
 				if front == BlockNil || !front.Active() {
 					cm.addFrontFace(xx, yy, zz, data)
 					cm.addFaceColors(blockType, data)
-					cm.addFaceIndices(data)
+					data.IndexCount += 6
 				}
 				if back == BlockNil || !back.Active() {
 					cm.addBackFace(xx, yy, zz, data)
 					cm.addFaceColors(blockType, data)
-					cm.addFaceIndices(data)
+					data.IndexCount += 6
 				}
 			}
 		}
 	}
-
 	return data
-}
-
-func (cm *CulledMesher) addFaceIndices(data *MeshData) {
-	verts := uint16(len(data.Positions) / 3)
-	data.Indices = append(data.Indices,
-		verts-4, verts-3, verts-2,
-		verts-2, verts-1, verts-4,
-	)
 }
 
 func (cm *CulledMesher) addFaceColors(blockType *BlockType, data *MeshData) {

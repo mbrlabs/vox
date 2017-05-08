@@ -37,7 +37,7 @@ func NewWorld() *World {
 func (w *World) CreateChunk(x, y, z int) {
 	chunk := w.generator.GenerateChunkAt(x, y, z, w.BlockBank)
 	meshData := w.mesher.Generate(chunk, w.BlockBank)
-	fmt.Printf("verts: %v, indices: %v\n", len(meshData.Positions)/3, len(meshData.Indices))
+	fmt.Printf("verts: %v, indices: %v\n", len(meshData.Positions)/3, meshData.IndexCount)
 
 	mesh := NewMesh()
 	mesh.Load(meshData)

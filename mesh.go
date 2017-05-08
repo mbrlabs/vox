@@ -13,7 +13,9 @@
 
 package vox
 
-import "github.com/go-gl/gl/v3.3-core/gl"
+import (
+	"github.com/go-gl/gl/v3.3-core/gl"
+)
 
 const (
 	AttribIndexPositions = 0
@@ -21,16 +23,39 @@ const (
 	AttribIndexNormals   = 2
 )
 
+var (
+	mustCreateChunkIndexBuffer bool = true
+	cunckIndexBuffer           uint32
+)
+
+func createChunkIndexBuffer() {
+	// TODO make dynamic/resizable if a chunks needs more indices
+	var verts uint16
+	quads := 16000
+
+	indices := make([]uint16, 0)
+	for i := 0; i < quads; i++ {
+		verts += 4
+		indices = append(indices,
+			verts-4, verts-3, verts-2,
+			verts-2, verts-1, verts-4,
+		)
+	}
+
+	gl.GenBuffers(1, &cunckIndexBuffer)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, cunckIndexBuffer)
+	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(indices)*2, gl.Ptr(indices), gl.STATIC_DRAW)
+}
+
 type MeshData struct {
-	Positions []float32
-	Indices   []uint16
-	Colors    []float32
+	Positions  []float32
+	Colors     []float32
+	IndexCount int
 }
 
 type Mesh struct {
 	vao            uint32
 	positionBuffer uint32
-	indexBuffer    uint32
 	colorBuffer    uint32
 
 	IndexCount int32
@@ -40,22 +65,25 @@ func NewMesh() *Mesh {
 	mesh := &Mesh{}
 	gl.GenVertexArrays(1, &mesh.vao)
 	gl.GenBuffers(1, &mesh.positionBuffer)
-	gl.GenBuffers(1, &mesh.indexBuffer)
 	gl.GenBuffers(1, &mesh.colorBuffer)
 
 	return mesh
 }
 
 func (m *Mesh) Load(data *MeshData) {
-	gl.BindVertexArray(m.vao)
+	// generate global index buffer if not already done
+	if mustCreateChunkIndexBuffer {
+		createChunkIndexBuffer()
+		mustCreateChunkIndexBuffer = false
+	}
 
-	indices := data.Indices
 	positions := data.Positions
 	colors := data.Colors
 
-	// indices
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.indexBuffer)
-	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(indices)*2, gl.Ptr(indices), gl.STATIC_DRAW)
+	gl.BindVertexArray(m.vao)
+
+	// bind global index buffer
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, cunckIndexBuffer)
 
 	// positions
 	gl.BindBuffer(gl.ARRAY_BUFFER, m.positionBuffer)
@@ -70,7 +98,7 @@ func (m *Mesh) Load(data *MeshData) {
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	gl.BindVertexArray(0)
 
-	m.IndexCount = int32(len(indices))
+	m.IndexCount = int32(len(data.Positions))
 }
 
 func (m *Mesh) Bind() {
