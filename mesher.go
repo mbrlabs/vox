@@ -13,8 +13,6 @@
 
 package vox
 
-import "fmt"
-
 const CubeSize = 1.0
 
 type Mesher interface {
@@ -43,10 +41,6 @@ func (cm *CulledMesher) Generate(chunk *Chunk, chunks map[ChunkPosition]*Chunk, 
 	frontChunk := chunks[*chunkPos.Set(chunk.Position.X, chunk.Position.Y, chunk.Position.Z+1)]
 	backChunk := chunks[*chunkPos.Set(chunk.Position.X, chunk.Position.Y, chunk.Position.Z-1)]
 
-	if backChunk != nil {
-		fmt.Println(backChunk.Position)
-	}
-
 	for x := 0; x < ChunkWidth; x++ {
 		for z := 0; z < ChunkDepth; z++ {
 			for y := 0; y < ChunkHeight; y++ {
@@ -74,65 +68,57 @@ func (cm *CulledMesher) Generate(chunk *Chunk, chunks map[ChunkPosition]*Chunk, 
 				// add new faces if adjaciant neighbor is inactive
 				if left == BlockNil {
 					if leftChunk == nil || !leftChunk.Get(ChunkWidth-1, y, z).Active() {
-						cm.addLeftFace(xx, yy, zz, data)
-						cm.addFaceColors(blockType, data)
+						cm.addLeftFace(xx, yy, zz, data, blockType)
 					}
 				} else if left != BlockNil && !left.Active() {
-					cm.addLeftFace(xx, yy, zz, data)
-					cm.addFaceColors(blockType, data)
+					cm.addLeftFace(xx, yy, zz, data, blockType)
 				}
 
 				if right == BlockNil {
 					if rightChunk == nil || !rightChunk.Get(0, y, z).Active() {
-						cm.addRightFace(xx, yy, zz, data)
-						cm.addFaceColors(blockType, data)
+						cm.addRightFace(xx, yy, zz, data, blockType)
 					}
 				} else if right != BlockNil && !right.Active() {
-					cm.addRightFace(xx, yy, zz, data)
-					cm.addFaceColors(blockType, data)
+					cm.addRightFace(xx, yy, zz, data, blockType)
 				}
 
 				if top == BlockNil {
 					if topChunk == nil || !topChunk.Get(x, 0, z).Active() {
-						cm.addTopFace(xx, yy, zz, data)
-						cm.addFaceColors(blockType, data)
+						cm.addTopFace(xx, yy, zz, data, blockType)
 					}
 				} else if top != BlockNil && !top.Active() {
-					cm.addTopFace(xx, yy, zz, data)
-					cm.addFaceColors(blockType, data)
+					cm.addTopFace(xx, yy, zz, data, blockType)
 				}
 
 				if bottom == BlockNil {
 					if bottomChunk == nil || !bottomChunk.Get(x, ChunkHeight-1, z).Active() {
-						cm.addBottomFace(xx, yy, zz, data)
-						cm.addFaceColors(blockType, data)
+						cm.addBottomFace(xx, yy, zz, data, blockType)
 					}
 				} else if bottom != BlockNil && !bottom.Active() {
-					cm.addBottomFace(xx, yy, zz, data)
-					cm.addFaceColors(blockType, data)
+					cm.addBottomFace(xx, yy, zz, data, blockType)
 				}
 
 				if front == BlockNil {
 					if frontChunk == nil || !frontChunk.Get(x, y, ChunkDepth-1).Active() {
-						cm.addFrontFace(xx, yy, zz, data)
-						cm.addFaceColors(blockType, data)
+						cm.addFrontFace(xx, yy, zz, data, blockType)
 					}
 				} else if front != BlockNil && !front.Active() {
-					cm.addFrontFace(xx, yy, zz, data)
-					cm.addFaceColors(blockType, data)
+					cm.addFrontFace(xx, yy, zz, data, blockType)
 				}
 
 				if back == BlockNil {
 					if backChunk == nil || !backChunk.Get(x, y, 0).Active() {
-						cm.addBackFace(xx, yy, zz, data)
-						cm.addFaceColors(blockType, data)
+						cm.addBackFace(xx, yy, zz, data, blockType)
 					}
 				} else if back != BlockNil && !back.Active() {
-					cm.addBackFace(xx, yy, zz, data)
-					cm.addFaceColors(blockType, data)
+					cm.addBackFace(xx, yy, zz, data, blockType)
 				}
 			}
 		}
+	}
+
+	if len(data.Positions) == 0 {
+		return nil
 	}
 	return data
 }
@@ -143,62 +129,68 @@ func (cm *CulledMesher) addFaceColors(blockType *BlockType, data *MeshData) {
 	}
 }
 
-func (cm *CulledMesher) addLeftFace(x, y, z float32, data *MeshData) {
+func (cm *CulledMesher) addLeftFace(x, y, z float32, data *MeshData, blockType *BlockType) {
 	data.Positions = append(data.Positions,
 		x, y, z-CubeSize,
 		x, y, z,
 		x, y+CubeSize, z,
 		x, y+CubeSize, z-CubeSize,
 	)
+	cm.addFaceColors(blockType, data)
 	data.IndexCount += 6
 }
 
-func (cm *CulledMesher) addRightFace(x, y, z float32, data *MeshData) {
+func (cm *CulledMesher) addRightFace(x, y, z float32, data *MeshData, blockType *BlockType) {
 	data.Positions = append(data.Positions,
 		x+CubeSize, y, z,
 		x+CubeSize, y, z-CubeSize,
 		x+CubeSize, y+CubeSize, z-CubeSize,
 		x+CubeSize, y+CubeSize, z,
 	)
+	cm.addFaceColors(blockType, data)
 	data.IndexCount += 6
 }
 
-func (cm *CulledMesher) addTopFace(x, y, z float32, data *MeshData) {
+func (cm *CulledMesher) addTopFace(x, y, z float32, data *MeshData, blockType *BlockType) {
 	data.Positions = append(data.Positions,
 		x, y+CubeSize, z,
 		x+CubeSize, y+CubeSize, z,
 		x+CubeSize, y+CubeSize, z-CubeSize,
 		x, y+CubeSize, z-CubeSize,
 	)
+	cm.addFaceColors(blockType, data)
 	data.IndexCount += 6
 }
 
-func (cm *CulledMesher) addBottomFace(x, y, z float32, data *MeshData) {
+func (cm *CulledMesher) addBottomFace(x, y, z float32, data *MeshData, blockType *BlockType) {
 	data.Positions = append(data.Positions,
 		x, y, z,
 		x+CubeSize, y, z,
 		x+CubeSize, y, z-CubeSize,
 		x, y, z-CubeSize,
 	)
+	cm.addFaceColors(blockType, data)
 	data.IndexCount += 6
 }
 
-func (cm *CulledMesher) addFrontFace(x, y, z float32, data *MeshData) {
+func (cm *CulledMesher) addFrontFace(x, y, z float32, data *MeshData, blockType *BlockType) {
 	data.Positions = append(data.Positions,
 		x, y, z,
 		x+CubeSize, y, z,
 		x+CubeSize, y+CubeSize, z,
 		x, y+CubeSize, z,
 	)
+	cm.addFaceColors(blockType, data)
 	data.IndexCount += 6
 }
 
-func (cm *CulledMesher) addBackFace(x, y, z float32, data *MeshData) {
+func (cm *CulledMesher) addBackFace(x, y, z float32, data *MeshData, blockType *BlockType) {
 	data.Positions = append(data.Positions,
 		x+CubeSize, y, z-CubeSize,
 		x+CubeSize, y+CubeSize, z-CubeSize,
 		x, y+CubeSize, z-CubeSize,
 		x, y, z-CubeSize,
 	)
+	cm.addFaceColors(blockType, data)
 	data.IndexCount += 6
 }

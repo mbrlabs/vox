@@ -117,6 +117,11 @@ func (r *WorldRenderer) Render(cam *Camera, world *World) {
 	//bank := world.BlockBank
 
 	for _, chunk := range world.Chunks {
+		// can happen if chunk is completly sourrounded by other chunks and not a single triange would be drawn
+		if chunk.Mesh == nil {
+			continue
+		}
+
 		chunk.Mesh.Bind()
 
 		// solid render pass

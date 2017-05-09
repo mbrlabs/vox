@@ -38,8 +38,10 @@ func (w *World) CreateChunk(x, y, z int) {
 func (w *World) LoadChunks() {
 	for _, chunk := range w.Chunks {
 		meshData := w.mesher.Generate(chunk, w.Chunks, w.BlockBank)
-		mesh := NewMesh()
-		mesh.Load(meshData)
-		chunk.Mesh = mesh
+		if meshData != nil {
+			mesh := NewMesh()
+			mesh.Load(meshData)
+			chunk.Mesh = mesh
+		}
 	}
 }
