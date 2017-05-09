@@ -19,8 +19,8 @@ import (
 
 const (
 	AttribIndexPositions = 0
-	AttribIndexColor     = 1
-	AttribIndexNormals   = 2
+	AttribIndexNormals   = 1
+	AttribIndexUvs       = 2
 )
 
 var (
@@ -49,14 +49,14 @@ func createChunkIndexBuffer() {
 
 type MeshData struct {
 	Positions  []float32
-	Colors     []float32
+	Uvs        []float32
 	IndexCount int
 }
 
 type Mesh struct {
 	vao            uint32
 	positionBuffer uint32
-	colorBuffer    uint32
+	uvBuffer       uint32
 
 	IndexCount int32
 }
@@ -65,7 +65,7 @@ func NewMesh() *Mesh {
 	mesh := &Mesh{}
 	gl.GenVertexArrays(1, &mesh.vao)
 	gl.GenBuffers(1, &mesh.positionBuffer)
-	gl.GenBuffers(1, &mesh.colorBuffer)
+	gl.GenBuffers(1, &mesh.uvBuffer)
 
 	return mesh
 }
@@ -78,7 +78,7 @@ func (m *Mesh) Load(data *MeshData) {
 	}
 
 	positions := data.Positions
-	colors := data.Colors
+	uvs := data.Uvs
 
 	gl.BindVertexArray(m.vao)
 
@@ -90,10 +90,10 @@ func (m *Mesh) Load(data *MeshData) {
 	gl.BufferData(gl.ARRAY_BUFFER, len(positions)*4, gl.Ptr(positions), gl.STATIC_DRAW)
 	gl.VertexAttribPointer(AttribIndexPositions, 3, gl.FLOAT, false, 0, gl.PtrOffset(0))
 
-	// colors
-	gl.BindBuffer(gl.ARRAY_BUFFER, m.colorBuffer)
-	gl.BufferData(gl.ARRAY_BUFFER, len(colors)*4, gl.Ptr(colors), gl.STATIC_DRAW)
-	gl.VertexAttribPointer(AttribIndexColor, 3, gl.FLOAT, false, 0, gl.PtrOffset(0))
+	// uvs
+	gl.BindBuffer(gl.ARRAY_BUFFER, m.uvBuffer)
+	gl.BufferData(gl.ARRAY_BUFFER, len(uvs)*4, gl.Ptr(uvs), gl.STATIC_DRAW)
+	gl.VertexAttribPointer(AttribIndexUvs, 2, gl.FLOAT, false, 0, gl.PtrOffset(0))
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	gl.BindVertexArray(0)
@@ -104,11 +104,11 @@ func (m *Mesh) Load(data *MeshData) {
 func (m *Mesh) Bind() {
 	gl.BindVertexArray(m.vao)
 	gl.EnableVertexAttribArray(AttribIndexPositions)
-	gl.EnableVertexAttribArray(AttribIndexColor)
+	gl.EnableVertexAttribArray(AttribIndexUvs)
 }
 
 func (m *Mesh) Unbind() {
-	gl.EnableVertexAttribArray(AttribIndexColor)
+	gl.EnableVertexAttribArray(AttribIndexUvs)
 	gl.DisableVertexAttribArray(AttribIndexPositions)
 	gl.BindVertexArray(0)
 }

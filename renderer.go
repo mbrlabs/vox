@@ -22,12 +22,12 @@ uniform mat4 u_mvp;
 
 in vec3 a_pos;
 in vec3 a_norm;
-in vec3 a_color;
+in vec2 a_uv;
 
 out vec3 color;
 
 void main() {
-    color = a_color;
+    color = vec3(0.3, 0.3, 0.3);
     gl_Position = u_mvp * vec4(a_pos, 1.0);
 }
 `
@@ -83,7 +83,7 @@ func NewWorldRenderer() *WorldRenderer {
 	// solid shader
 	attribs := []VertexAttribute{
 		{Position: AttribIndexPositions, Name: "a_pos"},
-		{Position: AttribIndexColor, Name: "a_color"},
+		{Position: AttribIndexUvs, Name: "a_uv"},
 		{Position: AttribIndexNormals, Name: "a_norm"},
 	}
 	ss, err := NewShader(worldVert, worldFrag, attribs)

@@ -117,12 +117,6 @@ func (cm *CulledMesher) Generate(chunk *Chunk, chunks map[ChunkPosition]*Chunk, 
 	return data
 }
 
-func (cm *CulledMesher) addFaceColors(blockType *BlockType, data *MeshData) {
-	for i := 0; i < 4; i++ {
-		data.Colors = append(data.Colors, blockType.Color.R, blockType.Color.G, blockType.Color.B)
-	}
-}
-
 func (cm *CulledMesher) addLeftFace(x, y, z float32, data *MeshData, blockType *BlockType) {
 	data.Positions = append(data.Positions,
 		x, y, z-CubeSize,
@@ -130,7 +124,7 @@ func (cm *CulledMesher) addLeftFace(x, y, z float32, data *MeshData, blockType *
 		x, y+CubeSize, z,
 		x, y+CubeSize, z-CubeSize,
 	)
-	cm.addFaceColors(blockType, data)
+	data.Uvs = append(data.Uvs, 0, 0, 1, 0, 1, 1, 0, 1)
 	data.IndexCount += 6
 }
 
@@ -141,7 +135,7 @@ func (cm *CulledMesher) addRightFace(x, y, z float32, data *MeshData, blockType 
 		x+CubeSize, y+CubeSize, z-CubeSize,
 		x+CubeSize, y+CubeSize, z,
 	)
-	cm.addFaceColors(blockType, data)
+	data.Uvs = append(data.Uvs, 0, 0, 1, 0, 1, 1, 0, 1)
 	data.IndexCount += 6
 }
 
@@ -152,7 +146,7 @@ func (cm *CulledMesher) addTopFace(x, y, z float32, data *MeshData, blockType *B
 		x+CubeSize, y+CubeSize, z-CubeSize,
 		x, y+CubeSize, z-CubeSize,
 	)
-	cm.addFaceColors(blockType, data)
+	data.Uvs = append(data.Uvs, 0, 0, 1, 0, 1, 1, 0, 1)
 	data.IndexCount += 6
 }
 
@@ -163,7 +157,7 @@ func (cm *CulledMesher) addBottomFace(x, y, z float32, data *MeshData, blockType
 		x+CubeSize, y, z-CubeSize,
 		x, y, z-CubeSize,
 	)
-	cm.addFaceColors(blockType, data)
+	data.Uvs = append(data.Uvs, 0, 0, 1, 0, 1, 1, 0, 1)
 	data.IndexCount += 6
 }
 
@@ -174,7 +168,7 @@ func (cm *CulledMesher) addFrontFace(x, y, z float32, data *MeshData, blockType 
 		x+CubeSize, y+CubeSize, z,
 		x, y+CubeSize, z,
 	)
-	cm.addFaceColors(blockType, data)
+	data.Uvs = append(data.Uvs, 0, 0, 1, 0, 1, 1, 0, 1)
 	data.IndexCount += 6
 }
 
@@ -185,6 +179,6 @@ func (cm *CulledMesher) addBackFace(x, y, z float32, data *MeshData, blockType *
 		x, y+CubeSize, z-CubeSize,
 		x, y, z-CubeSize,
 	)
-	cm.addFaceColors(blockType, data)
+	data.Uvs = append(data.Uvs, 0, 0, 1, 0, 1, 1, 0, 1)
 	data.IndexCount += 6
 }
