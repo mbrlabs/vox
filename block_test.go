@@ -37,8 +37,8 @@ func TestBlockActive(t *testing.T) {
 }
 
 func TestBlockType(t *testing.T) {
-	grass := &BlockType{ID: 1, Color: nil}
-	water := &BlockType{ID: 2, Color: nil}
+	grass := &BlockType{ID: 1}
+	water := &BlockType{ID: 2}
 
 	var block Block
 	block = block.ChangeType(grass)
