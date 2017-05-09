@@ -13,7 +13,9 @@
 
 package vox
 
-import "math/rand"
+import (
+	"math/rand"
+)
 
 type Generator interface {
 	GenerateChunkAt(x, y, z int, bank *BlockBank) *Chunk
@@ -55,7 +57,7 @@ func (g *FlatGenerator) GenerateChunkAt(x, y, z int, bank *BlockBank) *Chunk {
 	for i := 0; i < ChunkXYZ; i++ {
 		c.Blocks[i] = c.Blocks[i].Activate(true)
 
-		// block type (color)
+		// block type
 		if typeIdx >= len(bank.Types) {
 			typeIdx = 0
 		}

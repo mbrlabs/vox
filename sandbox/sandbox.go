@@ -25,11 +25,21 @@ type Sandbox struct {
 	world         *vox.World
 	oldX, dx      float32
 
+	blockBank *vox.BlockBank
+	atlas     *vox.TextureAtlas
+
 	fpsLogger *vox.FpsLogger
 }
 
 func (s *Sandbox) Create() {
 	vox.Vox.AddKeyListener(s)
+
+	// load assets
+	s.atlas = vox.NewTextureAtlas("assets/atlas.json", "assets/atlas.png")
+	s.blockBank = vox.NewBlockBank()
+	for _, t := range createBlockTypes(s.atlas) {
+		s.blockBank.AddType(t)
+	}
 
 	ratio := float32(windowWidth) / float32(windowHeight)
 	s.cam = vox.NewCamera(70, ratio, 0.01, 1000)
@@ -41,32 +51,28 @@ func (s *Sandbox) Create() {
 	vox.Vox.AddKeyListener(s.fpsController)
 
 	s.world = vox.NewWorld()
-	s.world.BlockBank.AddType(&vox.BlockType{ID: 0x01, Color: vox.ColorRed.Copy()})
-	s.world.BlockBank.AddType(&vox.BlockType{ID: 0x02, Color: vox.ColorGreen.Copy()})
-	s.world.BlockBank.AddType(&vox.BlockType{ID: 0x03, Color: vox.ColorBlue.Copy()})
-	s.world.BlockBank.AddType(&vox.BlockType{ID: 0x04, Color: vox.ColorTeal.Copy()})
 
 	// create huge flat 5x2x5 cube
 	for x := 0; x < 20; x++ {
 		for z := 0; z < 20; z++ {
 			for y := 0; y < 5; y++ {
-				s.world.CreateChunk(x, -5+y, z)
+				s.world.CreateChunk(x, -5+y, z, s.blockBank)
 			}
 		}
 	}
 
 	// create interesting connected chunks
-	s.world.CreateChunk(0, -1, 0)
-	s.world.CreateChunk(0, 0, 0)
-	s.world.CreateChunk(0, 1, 0)
-	s.world.CreateChunk(0, 2, 0)
-	s.world.CreateChunk(1, 2, 0)
-	s.world.CreateChunk(2, 2, 0)
-	s.world.CreateChunk(2, 2, 1)
-	s.world.CreateChunk(2, 2, 2)
+	s.world.CreateChunk(0, -1, 0, s.blockBank)
+	s.world.CreateChunk(0, 0, 0, s.blockBank)
+	s.world.CreateChunk(0, 1, 0, s.blockBank)
+	s.world.CreateChunk(0, 2, 0, s.blockBank)
+	s.world.CreateChunk(1, 2, 0, s.blockBank)
+	s.world.CreateChunk(2, 2, 0, s.blockBank)
+	s.world.CreateChunk(2, 2, 1, s.blockBank)
+	s.world.CreateChunk(2, 2, 2, s.blockBank)
 
 	// mesh & upload chunks
-	s.world.LoadChunks()
+	s.world.LoadChunks(s.blockBank)
 
 	s.renderer = vox.NewWorldRenderer()
 	s.fpsLogger = &vox.FpsLogger{}
@@ -76,6 +82,7 @@ func (s *Sandbox) Create() {
 
 func (s *Sandbox) Dispose() {
 	s.renderer.Dispose()
+	s.atlas.Dispose()
 }
 
 func (s *Sandbox) Update(delta float32) {
@@ -89,6 +96,7 @@ func (s *Sandbox) Render(delta float32) {
 	gl.ClearColor(0.95, 0.95, 0.95, 0.0)
 
 	// render world
+	s.atlas.Bind()
 	s.renderer.Render(s.cam, s.world)
 }
 

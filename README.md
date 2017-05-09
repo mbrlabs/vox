@@ -1,12 +1,12 @@
 # Vox [![](https://godoc.org/github.com/mbrlabs/vox?status.svg)](https://godoc.org/github.com/mbrlabs/vox) [![](https://travis-ci.org/mbrlabs/vox.svg?branch=master)](https://travis-ci.org/mbrlabs/vox)
 Vox is a WIP voxel engine written in Go & OpenGL.
 
-## Building and running demos
+## Building and running the demo
 
 ```bash
 go get github.com/mbrlabs/vox
 cd $GOPATH/github.com/mbrlabs/vox
-go run path/to/demo.go
+to run sandbox/*.go
 ```
 
 ## Dependencies

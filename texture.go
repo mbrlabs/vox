@@ -20,7 +20,12 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 
+	"io/ioutil"
+
+	"encoding/json"
+
 	"github.com/go-gl/gl/v3.3-core/gl"
+	"github.com/mbrlabs/vox/glm"
 )
 
 type Pixmap struct {
@@ -44,8 +49,8 @@ func NewPixmap(path string) *Pixmap {
 	bounds := img.Bounds()
 	width, height := bounds.Max.X, bounds.Max.Y
 	pixels := make([]uint8, 0)
-	for x := 0; x < width; x++ {
-		for y := 0; y < height; y++ {
+	for y := height - 1; y >= 0; y-- {
+		for x := 0; x < width; x++ {
 			r, g, b, _ := img.At(x, y).RGBA()
 			pixels = append(pixels, uint8(r/257), uint8(g/257), uint8(b/257))
 		}
@@ -59,6 +64,7 @@ func NewPixmap(path string) *Pixmap {
 }
 
 type Texture struct {
+	Disposable
 	id     uint32
 	width  int32
 	height int32
@@ -106,4 +112,79 @@ func (t *Texture) Bind() {
 
 func (t *Texture) Unbind() {
 	gl.BindTexture(gl.TEXTURE_2D, 0)
+}
+
+func (t *Texture) Dispose() {
+	gl.DeleteTextures(1, &t.id)
+}
+
+type TextureRegion struct {
+	Atlas *TextureAtlas
+	Uvs   [4]glm.Vector2
+
+	Name   string  `json:"name"`
+	Width  float32 `json:"width"`
+	Height float32 `json:"height"`
+	X      float32 `json:"x"`
+	Y      float32 `json:"y"`
+}
+
+type TextureAtlas struct {
+	Regions map[string]*TextureRegion
+	texture *Texture
+}
+
+func NewTextureAtlas(jsonPath, imagePath string) *TextureAtlas {
+	// create texture
+	texture := NewTexture(imagePath, true)
+	atlas := &TextureAtlas{make(map[string]*TextureRegion), texture}
+	atlasWidth, atlasHeight := float32(texture.width), float32(texture.height)
+
+	// parse json
+	rawJSON, err := ioutil.ReadFile(jsonPath)
+	if err != nil {
+		panic(err)
+	}
+	regions := make([]*TextureRegion, 0)
+	err = json.Unmarshal(rawJSON, &regions)
+	if err != nil {
+		panic(err)
+	}
+
+	// calulcate uvs & put regions in map
+	for _, region := range regions {
+		region.Uvs[0] = glm.Vector2{
+			region.X / atlasWidth,
+			region.Y / atlasHeight,
+		}
+		region.Uvs[1] = glm.Vector2{
+			(region.X + region.Width) / atlasWidth,
+			region.Y / atlasHeight,
+		}
+		region.Uvs[2] = glm.Vector2{
+			(region.X + region.Width) / atlasWidth,
+			(region.Y + region.Height) / atlasHeight,
+		}
+		region.Uvs[3] = glm.Vector2{
+			region.X / atlasWidth,
+			(region.Y + region.Height) / atlasHeight,
+		}
+
+		region.Atlas = atlas
+		atlas.Regions[region.Name] = region
+	}
+
+	return atlas
+}
+
+func (a *TextureAtlas) Bind() {
+	a.texture.Bind()
+}
+
+func (a *TextureAtlas) Unbind() {
+	a.texture.Unbind()
+}
+
+func (a *TextureAtlas) Dispose() {
+	a.texture.Dispose()
 }

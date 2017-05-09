@@ -117,6 +117,16 @@ func (cm *CulledMesher) Generate(chunk *Chunk, chunks map[ChunkPosition]*Chunk, 
 	return data
 }
 
+func (cm *CulledMesher) addUvs(data *MeshData, region *TextureRegion) {
+	uvs := &region.Uvs
+	data.Uvs = append(data.Uvs,
+		uvs[0].X, uvs[0].Y,
+		uvs[1].X, uvs[1].Y,
+		uvs[2].X, uvs[2].Y,
+		uvs[3].X, uvs[3].Y,
+	)
+}
+
 func (cm *CulledMesher) addLeftFace(x, y, z float32, data *MeshData, blockType *BlockType) {
 	data.Positions = append(data.Positions,
 		x, y, z-CubeSize,
@@ -124,7 +134,7 @@ func (cm *CulledMesher) addLeftFace(x, y, z float32, data *MeshData, blockType *
 		x, y+CubeSize, z,
 		x, y+CubeSize, z-CubeSize,
 	)
-	data.Uvs = append(data.Uvs, 0, 0, 1, 0, 1, 1, 0, 1)
+	cm.addUvs(data, blockType.Side)
 	data.IndexCount += 6
 }
 
@@ -135,7 +145,7 @@ func (cm *CulledMesher) addRightFace(x, y, z float32, data *MeshData, blockType 
 		x+CubeSize, y+CubeSize, z-CubeSize,
 		x+CubeSize, y+CubeSize, z,
 	)
-	data.Uvs = append(data.Uvs, 0, 0, 1, 0, 1, 1, 0, 1)
+	cm.addUvs(data, blockType.Side)
 	data.IndexCount += 6
 }
 
@@ -146,7 +156,7 @@ func (cm *CulledMesher) addTopFace(x, y, z float32, data *MeshData, blockType *B
 		x+CubeSize, y+CubeSize, z-CubeSize,
 		x, y+CubeSize, z-CubeSize,
 	)
-	data.Uvs = append(data.Uvs, 0, 0, 1, 0, 1, 1, 0, 1)
+	cm.addUvs(data, blockType.Top)
 	data.IndexCount += 6
 }
 
@@ -157,7 +167,7 @@ func (cm *CulledMesher) addBottomFace(x, y, z float32, data *MeshData, blockType
 		x+CubeSize, y, z-CubeSize,
 		x, y, z-CubeSize,
 	)
-	data.Uvs = append(data.Uvs, 0, 0, 1, 0, 1, 1, 0, 1)
+	cm.addUvs(data, blockType.Bottom)
 	data.IndexCount += 6
 }
 
@@ -168,17 +178,17 @@ func (cm *CulledMesher) addFrontFace(x, y, z float32, data *MeshData, blockType 
 		x+CubeSize, y+CubeSize, z,
 		x, y+CubeSize, z,
 	)
-	data.Uvs = append(data.Uvs, 0, 0, 1, 0, 1, 1, 0, 1)
+	cm.addUvs(data, blockType.Side)
 	data.IndexCount += 6
 }
 
 func (cm *CulledMesher) addBackFace(x, y, z float32, data *MeshData, blockType *BlockType) {
 	data.Positions = append(data.Positions,
+		x, y, z-CubeSize,
 		x+CubeSize, y, z-CubeSize,
 		x+CubeSize, y+CubeSize, z-CubeSize,
 		x, y+CubeSize, z-CubeSize,
-		x, y, z-CubeSize,
 	)
-	data.Uvs = append(data.Uvs, 0, 0, 1, 0, 1, 1, 0, 1)
+	cm.addUvs(data, blockType.Side)
 	data.IndexCount += 6
 }

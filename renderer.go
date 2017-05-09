@@ -78,9 +78,6 @@ type WorldRenderer struct {
 
 	wireShader     *Shader
 	uniformWireMvp int32
-
-	// TOOD remove
-	testTexture *Texture
 }
 
 func NewWorldRenderer() *WorldRenderer {
@@ -105,7 +102,6 @@ func NewWorldRenderer() *WorldRenderer {
 	}
 
 	return &WorldRenderer{
-		testTexture:     NewTexture("assets/anvil_base.png", true),
 		solidShader:     ss,
 		wireShader:      ws,
 		uniformSolidMvp: gl.GetUniformLocation(ss.ID, gl.Str("u_mvp\x00")),
@@ -119,10 +115,6 @@ func (r *WorldRenderer) Dispose() {
 }
 
 func (r *WorldRenderer) Render(cam *Camera, world *World) {
-	//bank := world.BlockBank
-
-	r.testTexture.Bind()
-
 	for _, chunk := range world.Chunks {
 		// can happen if chunk is completly sourrounded by other chunks and not a single triange would be drawn
 		if chunk.Mesh == nil {

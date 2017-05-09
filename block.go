@@ -41,8 +41,10 @@ func (b Block) ChangeType(t *BlockType) Block {
 }
 
 type BlockType struct {
-	ID    uint8
-	Color *Color
+	ID     uint8
+	Top    *TextureRegion
+	Bottom *TextureRegion
+	Side   *TextureRegion
 }
 
 type BlockBank struct {

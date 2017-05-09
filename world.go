@@ -17,8 +17,7 @@ type World struct {
 	mesher    Mesher
 	generator Generator
 
-	BlockBank *BlockBank
-	Chunks    map[ChunkPosition]*Chunk
+	Chunks map[ChunkPosition]*Chunk
 }
 
 func NewWorld() *World {
@@ -26,18 +25,17 @@ func NewWorld() *World {
 		Chunks:    make(map[ChunkPosition]*Chunk),
 		mesher:    &CulledMesher{},
 		generator: &FlatGenerator{},
-		BlockBank: NewBlockBank(),
 	}
 }
 
-func (w *World) CreateChunk(x, y, z int) {
-	chunk := w.generator.GenerateChunkAt(x, y, z, w.BlockBank)
+func (w *World) CreateChunk(x, y, z int, bank *BlockBank) {
+	chunk := w.generator.GenerateChunkAt(x, y, z, bank)
 	w.Chunks[chunk.Position] = chunk
 }
 
-func (w *World) LoadChunks() {
+func (w *World) LoadChunks(bank *BlockBank) {
 	for _, chunk := range w.Chunks {
-		meshData := w.mesher.Generate(chunk, w.Chunks, w.BlockBank)
+		meshData := w.mesher.Generate(chunk, w.Chunks, bank)
 		if meshData != nil {
 			mesh := NewMesh()
 			mesh.Load(meshData)

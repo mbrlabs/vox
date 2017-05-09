@@ -28,7 +28,7 @@ import (
 )
 
 const (
-	AtlasSize  = 512
+	AtlasSize  = 128
 	Padding    = 2
 	AtlasJson  = "atlas.json"
 	AtlasImage = "atlas.png"
@@ -48,6 +48,7 @@ func main() {
 
 	packer := NewTexturePacker(loadImages(files), files)
 	packer.pack()
+	fmt.Println("Done")
 }
 
 func pwd() string {
@@ -76,7 +77,7 @@ func getImageFiles(dir string) []os.FileInfo {
 }
 
 func loadImages(files []os.FileInfo) []image.Image {
-	fmt.Printf("Loading %v images...\n", len(files))
+	fmt.Printf("Loading %v images\n", len(files))
 
 	images := make([]image.Image, 0)
 	for _, info := range files {
@@ -94,7 +95,6 @@ func loadImages(files []os.FileInfo) []image.Image {
 		images = append(images, img)
 	}
 
-	fmt.Println("Finished loading")
 	return images
 }
 
@@ -107,12 +107,10 @@ func max(x, y int) int {
 
 type TextureRegion struct {
 	Name   string  `json:"name"`
-	Width  int     `json:"width"`
-	Height int     `json:"height"`
-	X      int     `json:"x"`
-	Y      int     `json:"y"`
-	U      float32 `json:"u"`
-	V      float32 `json:"v"`
+	Width  float32 `json:"width"`
+	Height float32 `json:"height"`
+	X      float32 `json:"x"`
+	Y      float32 `json:"y"`
 }
 
 type TexturePacker struct {
@@ -135,6 +133,7 @@ func NewTexturePacker(images []image.Image, files []os.FileInfo) *TexturePacker 
 }
 
 func (p *TexturePacker) pack() {
+	fmt.Println("Creating atlas")
 	bounds := image.Rect(0, 0, AtlasSize, AtlasSize)
 	p.atlas = image.NewRGBA(bounds)
 	p.regions = make([]TextureRegion, 0)
@@ -179,20 +178,18 @@ func (p *TexturePacker) addImage(src image.Image, info os.FileInfo) {
 	}
 
 	for x := 0; x < srcWidth; x++ {
-		for y := 0; y < srcHeight; y++ {
-			p.putPixel(p.cursorX+x, p.cursorY+y, src.At(x, y))
+		for y := 0; y <= srcHeight; y++ {
+			p.putPixel(p.cursorX+x, p.cursorY+y, src.At(x, srcHeight-y))
 		}
 	}
 
 	p.regions = append(p.regions,
 		TextureRegion{
 			Name:   strings.TrimSuffix(info.Name(), ".png"),
-			Width:  srcWidth,
-			Height: srcHeight,
-			X:      p.cursorX,
-			Y:      p.cursorY,
-			U:      float32(float64(p.cursorX) / float64(AtlasSize)),
-			V:      float32(float64(p.cursorY) / float64(AtlasSize)),
+			Width:  float32(srcWidth),
+			Height: float32(srcHeight),
+			X:      float32(p.cursorX),
+			Y:      float32(p.cursorY),
 		},
 	)
 
