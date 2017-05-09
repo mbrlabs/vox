@@ -43,7 +43,7 @@ func NewPixmap(path string) *Pixmap {
 	// extract pixels
 	bounds := img.Bounds()
 	width, height := bounds.Max.X, bounds.Max.Y
-	pixels := make([]uint8, width*height*3)
+	pixels := make([]uint8, 0)
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
 			r, g, b, _ := img.At(x, y).RGBA()
@@ -64,7 +64,7 @@ type Texture struct {
 	height int32
 }
 
-func NewTexture(path string) *Texture {
+func NewTexture(path string, genMipmaps bool) *Texture {
 	pixmap := NewPixmap(path)
 
 	// generate texture
@@ -75,12 +75,18 @@ func NewTexture(path string) *Texture {
 	gl.GenTextures(1, &tex.id)
 
 	// upload to gpu & generate mipmaps
-	tex.Bind()
+	gl.BindTexture(gl.TEXTURE_2D, tex.id)
 	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGB, tex.width, tex.height, 0, gl.RGB, gl.UNSIGNED_BYTE, gl.Ptr(pixmap.Data))
-	gl.GenerateMipmap(gl.TEXTURE_2D)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
-	gl.TexParameterf(gl.TEXTURE_2D, gl.TEXTURE_LOD_BIAS, -1)
-	tex.Unbind()
+	if genMipmaps {
+		gl.GenerateMipmap(gl.TEXTURE_2D)
+		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
+		gl.TexParameterf(gl.TEXTURE_2D, gl.TEXTURE_LOD_BIAS, -1)
+	} else {
+		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+	}
+	gl.BindTexture(gl.TEXTURE_2D, 0)
 
 	return tex
 }
@@ -94,6 +100,7 @@ func (t *Texture) Height() int32 {
 }
 
 func (t *Texture) Bind() {
+	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D, t.id)
 }
 

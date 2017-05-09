@@ -24,10 +24,10 @@ in vec3 a_pos;
 in vec3 a_norm;
 in vec2 a_uv;
 
-out vec3 color;
+out vec2 texCoords;
 
 void main() {
-    color = vec3(0.3, 0.3, 0.3);
+	texCoords = a_uv;
     gl_Position = u_mvp * vec4(a_pos, 1.0);
 }
 `
@@ -35,12 +35,13 @@ void main() {
 const worldFrag = `
 #version 330
 
-in vec3 color;
+uniform sampler2D tex;
 
+in vec2 texCoords;
 out vec4 outColor;
 
 void main() {
-	outColor = vec4(color, 1.0);
+    outColor = texture(tex, texCoords);
 }
 `
 
@@ -77,6 +78,9 @@ type WorldRenderer struct {
 
 	wireShader     *Shader
 	uniformWireMvp int32
+
+	// TOOD remove
+	testTexture *Texture
 }
 
 func NewWorldRenderer() *WorldRenderer {
@@ -101,6 +105,7 @@ func NewWorldRenderer() *WorldRenderer {
 	}
 
 	return &WorldRenderer{
+		testTexture:     NewTexture("assets/anvil_base.png", true),
 		solidShader:     ss,
 		wireShader:      ws,
 		uniformSolidMvp: gl.GetUniformLocation(ss.ID, gl.Str("u_mvp\x00")),
@@ -115,6 +120,8 @@ func (r *WorldRenderer) Dispose() {
 
 func (r *WorldRenderer) Render(cam *Camera, world *World) {
 	//bank := world.BlockBank
+
+	r.testTexture.Bind()
 
 	for _, chunk := range world.Chunks {
 		// can happen if chunk is completly sourrounded by other chunks and not a single triange would be drawn
@@ -131,9 +138,9 @@ func (r *WorldRenderer) Render(cam *Camera, world *World) {
 		gl.DrawElements(gl.TRIANGLES, chunk.Mesh.IndexCount, gl.UNSIGNED_SHORT, gl.PtrOffset(0))
 
 		// wireframe render
-		r.wireShader.Enable()
-		gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
-		gl.UniformMatrix4fv(r.uniformWireMvp, 1, false, &cam.Combined.Data[0])
-		gl.DrawElements(gl.TRIANGLES, chunk.Mesh.IndexCount, gl.UNSIGNED_SHORT, gl.PtrOffset(0))
+		// r.wireShader.Enable()
+		// gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
+		// gl.UniformMatrix4fv(r.uniformWireMvp, 1, false, &cam.Combined.Data[0])
+		// gl.DrawElements(gl.TRIANGLES, chunk.Mesh.IndexCount, gl.UNSIGNED_SHORT, gl.PtrOffset(0))
 	}
 }

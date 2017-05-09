@@ -1,3 +1,3 @@
 #!/bin/bash
 
-go run sandbox/*.go
+cd sandbox && go run *.go
