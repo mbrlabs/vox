@@ -14,8 +14,9 @@
 package main
 
 import (
-	"github.com/mbrlabs/vox"
 	"runtime"
+
+	"github.com/mbrlabs/vox"
 )
 
 const (
@@ -38,7 +39,7 @@ func main() {
 		Resizable:    false,
 		Fullscreen:   false,
 		Vsync:        true,
-		HiddenCursor: false,
+		HiddenCursor: true,
 	})
 
 	window.Start(&Sandbox{})

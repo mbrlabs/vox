@@ -13,6 +13,8 @@
 
 package vox
 
+import "fmt"
+
 const (
 	ChunkWidth  = 16
 	ChunkDepth  = 16
@@ -23,6 +25,17 @@ const (
 
 type ChunkPosition struct {
 	X, Y, Z int
+}
+
+func (p *ChunkPosition) Set(x, y, z int) *ChunkPosition {
+	p.X = x
+	p.Y = y
+	p.Z = z
+	return p
+}
+
+func (p *ChunkPosition) String() string {
+	return fmt.Sprintf("ChunkPosition{%v, %v, %v}", p.X, p.Y, p.Z)
 }
 
 type Chunk struct {

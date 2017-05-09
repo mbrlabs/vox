@@ -13,10 +13,6 @@
 
 package vox
 
-import (
-	"fmt"
-)
-
 type World struct {
 	mesher    Mesher
 	generator Generator
@@ -29,19 +25,21 @@ func NewWorld() *World {
 	return &World{
 		Chunks:    make(map[ChunkPosition]*Chunk),
 		mesher:    &CulledMesher{},
-		generator: &StairGenerator{},
+		generator: &FlatGenerator{},
 		BlockBank: NewBlockBank(),
 	}
 }
 
 func (w *World) CreateChunk(x, y, z int) {
 	chunk := w.generator.GenerateChunkAt(x, y, z, w.BlockBank)
-	meshData := w.mesher.Generate(chunk, w.BlockBank)
-	fmt.Printf("verts: %v, indices: %v\n", len(meshData.Positions)/3, meshData.IndexCount)
-
-	mesh := NewMesh()
-	mesh.Load(meshData)
-	chunk.Mesh = mesh
-
 	w.Chunks[chunk.Position] = chunk
+}
+
+func (w *World) LoadChunks() {
+	for _, chunk := range w.Chunks {
+		meshData := w.mesher.Generate(chunk, w.Chunks, w.BlockBank)
+		mesh := NewMesh()
+		mesh.Load(meshData)
+		chunk.Mesh = mesh
+	}
 }
