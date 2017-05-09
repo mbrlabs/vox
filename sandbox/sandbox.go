@@ -47,10 +47,10 @@ func (s *Sandbox) Create() {
 	s.world.BlockBank.AddType(&vox.BlockType{ID: 0x04, Color: vox.ColorTeal.Copy()})
 
 	// create huge flat 5x2x5 cube
-	for x := 0; x < 10; x++ {
-		for z := 0; z < 10; z++ {
-			for y := 0; y < 3; y++ {
-				s.world.CreateChunk(x, -3+y, z)
+	for x := 0; x < 20; x++ {
+		for z := 0; z < 20; z++ {
+			for y := 0; y < 5; y++ {
+				s.world.CreateChunk(x, -5+y, z)
 			}
 		}
 	}

@@ -41,6 +41,7 @@ func (cm *CulledMesher) Generate(chunk *Chunk, chunks map[ChunkPosition]*Chunk, 
 	frontChunk := chunks[*chunkPos.Set(chunk.Position.X, chunk.Position.Y, chunk.Position.Z+1)]
 	backChunk := chunks[*chunkPos.Set(chunk.Position.X, chunk.Position.Y, chunk.Position.Z-1)]
 
+	hasFace := false
 	for x := 0; x < ChunkWidth; x++ {
 		for z := 0; z < ChunkDepth; z++ {
 			for y := 0; y < ChunkHeight; y++ {
@@ -65,52 +66,45 @@ func (cm *CulledMesher) Generate(chunk *Chunk, chunks map[ChunkPosition]*Chunk, 
 				front := chunk.Get(x, y, z+1)
 				back := chunk.Get(x, y, z-1)
 
-				// add new faces if adjaciant neighbor is inactive
-				if left == BlockNil {
-					if leftChunk == nil || !leftChunk.Get(ChunkWidth-1, y, z).Active() {
-						cm.addLeftFace(xx, yy, zz, data, blockType)
-					}
-				} else if left != BlockNil && !left.Active() {
+				// left face
+				hasFace = left == BlockNil && (leftChunk == nil || !leftChunk.Get(ChunkWidth-1, y, z).Active()) // check if adjacient chunk has occluding block
+				hasFace = hasFace || left != BlockNil && !left.Active()                                         // check if there is a adjacient block in the same chunk
+				if hasFace {
 					cm.addLeftFace(xx, yy, zz, data, blockType)
 				}
 
-				if right == BlockNil {
-					if rightChunk == nil || !rightChunk.Get(0, y, z).Active() {
-						cm.addRightFace(xx, yy, zz, data, blockType)
-					}
-				} else if right != BlockNil && !right.Active() {
+				// right face
+				hasFace = right == BlockNil && (rightChunk == nil || !rightChunk.Get(0, y, z).Active())
+				hasFace = hasFace || right != BlockNil && !right.Active()
+				if hasFace {
 					cm.addRightFace(xx, yy, zz, data, blockType)
 				}
 
-				if top == BlockNil {
-					if topChunk == nil || !topChunk.Get(x, 0, z).Active() {
-						cm.addTopFace(xx, yy, zz, data, blockType)
-					}
-				} else if top != BlockNil && !top.Active() {
+				// top face
+				hasFace = top == BlockNil && (topChunk == nil || !topChunk.Get(x, 0, z).Active())
+				hasFace = hasFace || top != BlockNil && !top.Active()
+				if hasFace {
 					cm.addTopFace(xx, yy, zz, data, blockType)
 				}
 
-				if bottom == BlockNil {
-					if bottomChunk == nil || !bottomChunk.Get(x, ChunkHeight-1, z).Active() {
-						cm.addBottomFace(xx, yy, zz, data, blockType)
-					}
-				} else if bottom != BlockNil && !bottom.Active() {
+				// bottom face
+				hasFace = bottom == BlockNil && (bottomChunk == nil || !bottomChunk.Get(x, ChunkHeight-1, z).Active())
+				hasFace = hasFace || bottom != BlockNil && !bottom.Active()
+				if hasFace {
 					cm.addBottomFace(xx, yy, zz, data, blockType)
 				}
 
-				if front == BlockNil {
-					if frontChunk == nil || !frontChunk.Get(x, y, ChunkDepth-1).Active() {
-						cm.addFrontFace(xx, yy, zz, data, blockType)
-					}
-				} else if front != BlockNil && !front.Active() {
+				// front face
+				hasFace = front == BlockNil && (frontChunk == nil || !frontChunk.Get(x, y, ChunkDepth-1).Active())
+				hasFace = hasFace || front != BlockNil && !front.Active()
+				if hasFace {
 					cm.addFrontFace(xx, yy, zz, data, blockType)
 				}
 
-				if back == BlockNil {
-					if backChunk == nil || !backChunk.Get(x, y, 0).Active() {
-						cm.addBackFace(xx, yy, zz, data, blockType)
-					}
-				} else if back != BlockNil && !back.Active() {
+				// back face
+				hasFace = back == BlockNil && (backChunk == nil || !backChunk.Get(x, y, 0).Active())
+				hasFace = hasFace || back != BlockNil && !back.Active()
+				if hasFace {
 					cm.addBackFace(xx, yy, zz, data, blockType)
 				}
 			}
