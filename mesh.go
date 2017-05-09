@@ -86,7 +86,6 @@ func (m *Mesh) Load(data *MeshData) {
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, cunckIndexBuffer)
 
 	// positions
-
 	gl.BindBuffer(gl.ARRAY_BUFFER, m.positionBuffer)
 	gl.BufferData(gl.ARRAY_BUFFER, len(positions)*4, gl.Ptr(positions), gl.STATIC_DRAW)
 	gl.VertexAttribPointer(AttribIndexPositions, 3, gl.FLOAT, false, 0, gl.PtrOffset(0))
