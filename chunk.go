@@ -43,6 +43,13 @@ type Chunk struct {
 	Blocks   [ChunkXYZ]Block
 	Mesh     *Mesh
 	meshData *MeshData
+
+	left   *Chunk
+	right  *Chunk
+	front  *Chunk
+	bottom *Chunk
+	top    *Chunk
+	back   *Chunk
 }
 
 func NewChunk(x, y, z int) *Chunk {
@@ -66,4 +73,53 @@ func (c *Chunk) Set(x, y, z int, block Block) {
 
 func (c *Chunk) IndexAt(x, y, z int) int {
 	return x + z*ChunkDepth + y*ChunkXZ
+}
+
+func (c *Chunk) setNeighbors(chunks map[ChunkPosition]*Chunk) {
+	chunkPos := &ChunkPosition{}
+	c.left = chunks[*chunkPos.Set(c.Position.X-1, c.Position.Y, c.Position.Z)]
+	if c.left != nil {
+		c.left.right = c
+	}
+	c.right = chunks[*chunkPos.Set(c.Position.X+1, c.Position.Y, c.Position.Z)]
+	if c.right != nil {
+		c.right.left = c
+	}
+	c.top = chunks[*chunkPos.Set(c.Position.X, c.Position.Y+1, c.Position.Z)]
+	if c.top != nil {
+		c.top.bottom = c
+	}
+	c.bottom = chunks[*chunkPos.Set(c.Position.X, c.Position.Y-1, c.Position.Z)]
+	if c.bottom != nil {
+		c.bottom.top = c
+	}
+	c.front = chunks[*chunkPos.Set(c.Position.X, c.Position.Y, c.Position.Z+1)]
+	if c.front != nil {
+		c.front.back = c
+	}
+	c.back = chunks[*chunkPos.Set(c.Position.X, c.Position.Y, c.Position.Z-1)]
+	if c.back != nil {
+		c.back.front = c
+	}
+}
+
+func (c *Chunk) unsetNeighbors() {
+	if c.left != nil {
+		c.left.right = nil
+	}
+	if c.right != nil {
+		c.right.left = nil
+	}
+	if c.top != nil {
+		c.top.bottom = nil
+	}
+	if c.bottom != nil {
+		c.bottom.top = nil
+	}
+	if c.front != nil {
+		c.front.back = nil
+	}
+	if c.back != nil {
+		c.back.front = nil
+	}
 }

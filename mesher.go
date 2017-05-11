@@ -16,7 +16,7 @@ package vox
 const CubeSize = 1.0
 
 type Mesher interface {
-	Generate(chunk *Chunk, chunks map[ChunkPosition]*Chunk, bank *BlockBank) *MeshData
+	Generate(chunk *Chunk, bank *BlockBank) *MeshData
 }
 
 // ----------------------------------------------------------------------------
@@ -24,22 +24,13 @@ type Mesher interface {
 type CulledMesher struct {
 }
 
-func (cm *CulledMesher) Generate(chunk *Chunk, chunks map[ChunkPosition]*Chunk, bank *BlockBank) *MeshData {
+func (cm *CulledMesher) Generate(chunk *Chunk, bank *BlockBank) *MeshData {
 	data := &MeshData{}
 
 	// these are the offset in world coordinates of the chunk
 	xOffset := float32(chunk.Position.X) * ChunkWidth
 	yOffset := float32(chunk.Position.Y) * ChunkHeight
 	zOffset := float32(chunk.Position.Z) * ChunkDepth
-
-	// get sourounding chunks
-	chunkPos := &ChunkPosition{}
-	leftChunk := chunks[*chunkPos.Set(chunk.Position.X-1, chunk.Position.Y, chunk.Position.Z)]
-	rightChunk := chunks[*chunkPos.Set(chunk.Position.X+1, chunk.Position.Y, chunk.Position.Z)]
-	topChunk := chunks[*chunkPos.Set(chunk.Position.X, chunk.Position.Y+1, chunk.Position.Z)]
-	bottomChunk := chunks[*chunkPos.Set(chunk.Position.X, chunk.Position.Y-1, chunk.Position.Z)]
-	frontChunk := chunks[*chunkPos.Set(chunk.Position.X, chunk.Position.Y, chunk.Position.Z+1)]
-	backChunk := chunks[*chunkPos.Set(chunk.Position.X, chunk.Position.Y, chunk.Position.Z-1)]
 
 	hasFace := false
 	for x := 0; x < ChunkWidth; x++ {
@@ -67,42 +58,42 @@ func (cm *CulledMesher) Generate(chunk *Chunk, chunks map[ChunkPosition]*Chunk, 
 				back := chunk.Get(x, y, z-1)
 
 				// left face
-				hasFace = left == BlockNil && (leftChunk == nil || !leftChunk.Get(ChunkWidth-1, y, z).Active()) // check if adjacient chunk has occluding block
-				hasFace = hasFace || left != BlockNil && !left.Active()                                         // check if there is a adjacient block in the same chunk
+				hasFace = left == BlockNil && (chunk.left == nil || !chunk.left.Get(ChunkWidth-1, y, z).Active()) // check if adjacient chunk has occluding block
+				hasFace = hasFace || left != BlockNil && !left.Active()                                           // check if there is a adjacient block in the same chunk
 				if hasFace {
 					cm.addLeftFace(xx, yy, zz, data, blockType)
 				}
 
 				// right face
-				hasFace = right == BlockNil && (rightChunk == nil || !rightChunk.Get(0, y, z).Active())
+				hasFace = right == BlockNil && (chunk.right == nil || !chunk.right.Get(0, y, z).Active())
 				hasFace = hasFace || right != BlockNil && !right.Active()
 				if hasFace {
 					cm.addRightFace(xx, yy, zz, data, blockType)
 				}
 
 				// top face
-				hasFace = top == BlockNil && (topChunk == nil || !topChunk.Get(x, 0, z).Active())
+				hasFace = top == BlockNil && (chunk.top == nil || !chunk.top.Get(x, 0, z).Active())
 				hasFace = hasFace || top != BlockNil && !top.Active()
 				if hasFace {
 					cm.addTopFace(xx, yy, zz, data, blockType)
 				}
 
 				// bottom face
-				hasFace = bottom == BlockNil && (bottomChunk == nil || !bottomChunk.Get(x, ChunkHeight-1, z).Active())
+				hasFace = bottom == BlockNil && (chunk.bottom == nil || !chunk.bottom.Get(x, ChunkHeight-1, z).Active())
 				hasFace = hasFace || bottom != BlockNil && !bottom.Active()
 				if hasFace {
 					cm.addBottomFace(xx, yy, zz, data, blockType)
 				}
 
 				// front face
-				hasFace = front == BlockNil && (frontChunk == nil || !frontChunk.Get(x, y, ChunkDepth-1).Active())
+				hasFace = front == BlockNil && (chunk.front == nil || !chunk.front.Get(x, y, ChunkDepth-1).Active())
 				hasFace = hasFace || front != BlockNil && !front.Active()
 				if hasFace {
 					cm.addFrontFace(xx, yy, zz, data, blockType)
 				}
 
 				// back face
-				hasFace = back == BlockNil && (backChunk == nil || !backChunk.Get(x, y, 0).Active())
+				hasFace = back == BlockNil && (chunk.back == nil || !chunk.back.Get(x, y, 0).Active())
 				hasFace = hasFace || back != BlockNil && !back.Active()
 				if hasFace {
 					cm.addBackFace(xx, yy, zz, data, blockType)

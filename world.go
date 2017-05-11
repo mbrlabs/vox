@@ -42,8 +42,12 @@ func NewWorld(bank *BlockBank, mesher Mesher, generator Generator) *World {
 // GenerateNewChunk generates a new chunk at the given chunk-coordinates.
 // This does not perform, any OpenGL calls.
 func (w *World) GenerateNewChunk(x, y, z int) {
+	// generate chunk
 	chunk := w.generator.GenerateChunkAt(x, y, z, w.bank)
+	chunk.setNeighbors(w.allChunks)
+	// TODO: re-mesh neighbors
 
+	// add to world
 	w.allChunks[chunk.Position] = chunk
 	w.remeshNeeded = append(w.remeshNeeded, chunk)
 }
@@ -51,6 +55,8 @@ func (w *World) GenerateNewChunk(x, y, z int) {
 func (w *World) RemoveChunk(x, y, z int) {
 	chunk := w.allChunks[ChunkPosition{x, y, z}]
 	if chunk != nil {
+		// TODO: re-mesh neighbors
+		chunk.unsetNeighbors()
 		delete(w.allChunks, chunk.Position)
 		delete(w.Chunks, chunk.Position)
 		w.unloadNeeded = append(w.unloadNeeded, chunk)
@@ -63,7 +69,7 @@ func (w *World) Update() {
 	// generate meshes
 	if len(w.remeshNeeded) > 0 {
 		for _, c := range w.remeshNeeded {
-			c.meshData = w.mesher.Generate(c, w.allChunks, w.bank)
+			c.meshData = w.mesher.Generate(c, w.bank)
 			if c.meshData != nil {
 				w.uploadNeeded = append(w.uploadNeeded, c)
 			}
