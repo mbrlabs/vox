@@ -114,6 +114,7 @@ func (m *Mesh) Unbind() {
 }
 
 func (m *Mesh) Dispose() {
-	// TODO delete buffers as well?
+	gl.DeleteBuffers(1, &m.positionBuffer)
+	gl.DeleteBuffers(1, &m.uvBuffer)
 	gl.DeleteVertexArrays(1, &m.vao)
 }
