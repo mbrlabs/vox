@@ -48,6 +48,15 @@ func (w *World) GenerateNewChunk(x, y, z int) {
 	w.remeshNeeded = append(w.remeshNeeded, chunk)
 }
 
+func (w *World) RemoveChunk(x, y, z int) {
+	chunk := w.allChunks[ChunkPosition{x, y, z}]
+	if chunk != nil {
+		delete(w.allChunks, chunk.Position)
+		delete(w.Chunks, chunk.Position)
+		w.unloadNeeded = append(w.unloadNeeded, chunk)
+	}
+}
+
 func (w *World) Update() {
 
 	// NOTE: later this must run in a worker goroutine
@@ -78,8 +87,19 @@ func (w *World) Update() {
 			// add to list
 			w.Chunks[c.Position] = c
 		}
-
 		w.clearUploadSlice()
+	}
+
+	// NOTE: later this must run on the main goroutine
+	// unload
+	if len(w.unloadNeeded) > 0 {
+		for _, c := range w.unloadNeeded {
+			// upload to gpu
+			if c.Mesh != nil {
+				c.Mesh.Dispose()
+			}
+		}
+		w.clearUnloadSlice()
 	}
 }
 
@@ -93,4 +113,10 @@ func (w *World) clearUploadSlice() {
 	// TODO properly clear this (see: https://github.com/golang/go/wiki/SliceTricks)
 	// also clearing slices in go really sucks...
 	w.uploadNeeded = make([]*Chunk, 0)
+}
+
+func (w *World) clearUnloadSlice() {
+	// TODO properly clear this (see: https://github.com/golang/go/wiki/SliceTricks)
+	// also clearing slices in go really sucks...
+	w.unloadNeeded = make([]*Chunk, 0)
 }

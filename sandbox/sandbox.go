@@ -116,6 +116,15 @@ func (s *Sandbox) KeyDown(key vox.Key) bool {
 			}
 		}
 		s.spawns += 3
+	} else if key == vox.KeyDelete {
+		for x := 0; x < 5; x++ {
+			for z := 0; z < 5; z++ {
+				for y := 0; y < 3; y++ {
+					s.world.RemoveChunk(9+x, s.spawns+y-3, z)
+				}
+			}
+		}
+		s.spawns -= 3
 	}
 
 	return false
