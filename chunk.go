@@ -42,6 +42,7 @@ type Chunk struct {
 	Position ChunkPosition
 	Blocks   [ChunkXYZ]Block
 	Mesh     *Mesh
+	meshData *MeshData
 }
 
 func NewChunk(x, y, z int) *Chunk {

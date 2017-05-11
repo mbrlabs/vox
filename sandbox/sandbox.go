@@ -29,6 +29,7 @@ type Sandbox struct {
 	atlas     *vox.TextureAtlas
 
 	fpsLogger *vox.FpsLogger
+	spawns    int
 }
 
 func (s *Sandbox) Create() {
@@ -50,29 +51,26 @@ func (s *Sandbox) Create() {
 	vox.Vox.AddMouseListener(s.fpsController)
 	vox.Vox.AddKeyListener(s.fpsController)
 
-	s.world = vox.NewWorld()
+	s.world = vox.NewWorld(s.blockBank, &vox.CulledMesher{}, &vox.FlatGenerator{})
 
 	// create huge flat 5x2x5 cube
-	for x := 0; x < 20; x++ {
-		for z := 0; z < 20; z++ {
-			for y := 0; y < 5; y++ {
-				s.world.CreateChunk(x, -5+y, z, s.blockBank)
+	for x := 0; x < 10; x++ {
+		for z := 0; z < 10; z++ {
+			for y := 0; y < 3; y++ {
+				s.world.GenerateNewChunk(x, -5+y, z)
 			}
 		}
 	}
 
 	// create interesting connected chunks
-	s.world.CreateChunk(0, -1, 0, s.blockBank)
-	s.world.CreateChunk(0, 0, 0, s.blockBank)
-	s.world.CreateChunk(0, 1, 0, s.blockBank)
-	s.world.CreateChunk(0, 2, 0, s.blockBank)
-	s.world.CreateChunk(1, 2, 0, s.blockBank)
-	s.world.CreateChunk(2, 2, 0, s.blockBank)
-	s.world.CreateChunk(2, 2, 1, s.blockBank)
-	s.world.CreateChunk(2, 2, 2, s.blockBank)
-
-	// mesh & upload chunks
-	s.world.LoadChunks(s.blockBank)
+	s.world.GenerateNewChunk(0, -1, 0)
+	s.world.GenerateNewChunk(0, 0, 0)
+	s.world.GenerateNewChunk(0, 1, 0)
+	s.world.GenerateNewChunk(0, 2, 0)
+	s.world.GenerateNewChunk(1, 2, 0)
+	s.world.GenerateNewChunk(2, 2, 0)
+	s.world.GenerateNewChunk(2, 2, 1)
+	s.world.GenerateNewChunk(2, 2, 2)
 
 	s.renderer = vox.NewWorldRenderer()
 	s.fpsLogger = &vox.FpsLogger{}
@@ -86,6 +84,8 @@ func (s *Sandbox) Dispose() {
 }
 
 func (s *Sandbox) Update(delta float32) {
+	s.world.Update()
+
 	s.fpsController.Update(delta)
 	s.fpsLogger.Log(delta)
 }
@@ -107,7 +107,17 @@ func (s *Sandbox) Resize(width, height int) {
 func (s *Sandbox) KeyDown(key vox.Key) bool {
 	if key == vox.KeyEscape {
 		vox.Vox.Exit()
+	} else if key == vox.KeyEnter {
+		for x := 0; x < 5; x++ {
+			for z := 0; z < 5; z++ {
+				for y := 0; y < 3; y++ {
+					s.world.GenerateNewChunk(9+x, s.spawns+y, z)
+				}
+			}
+		}
+		s.spawns += 3
 	}
+
 	return false
 }
 

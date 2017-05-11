@@ -6,7 +6,7 @@ Vox is a WIP voxel engine written in Go & OpenGL.
 ```bash
 go get github.com/mbrlabs/vox
 cd $GOPATH/github.com/mbrlabs/vox
-to run sandbox/*.go
+go run sandbox/*.go
 ```
 
 ## Dependencies

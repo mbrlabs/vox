@@ -16,30 +16,81 @@ package vox
 type World struct {
 	mesher    Mesher
 	generator Generator
+	bank      *BlockBank
 
-	Chunks map[ChunkPosition]*Chunk
+	Chunks       map[ChunkPosition]*Chunk
+	allChunks    map[ChunkPosition]*Chunk
+	remeshNeeded []*Chunk
+	uploadNeeded []*Chunk
+	unloadNeeded []*Chunk
 }
 
-func NewWorld() *World {
+func NewWorld(bank *BlockBank, mesher Mesher, generator Generator) *World {
 	return &World{
-		Chunks:    make(map[ChunkPosition]*Chunk),
-		mesher:    &CulledMesher{},
-		generator: &FlatGenerator{},
+		mesher:    mesher,
+		generator: generator,
+		bank:      bank,
+
+		Chunks:       make(map[ChunkPosition]*Chunk),
+		allChunks:    make(map[ChunkPosition]*Chunk),
+		remeshNeeded: make([]*Chunk, 0),
+		uploadNeeded: make([]*Chunk, 0),
+		unloadNeeded: make([]*Chunk, 0),
 	}
 }
 
-func (w *World) CreateChunk(x, y, z int, bank *BlockBank) {
-	chunk := w.generator.GenerateChunkAt(x, y, z, bank)
-	w.Chunks[chunk.Position] = chunk
+// GenerateNewChunk generates a new chunk at the given chunk-coordinates.
+// This does not perform, any OpenGL calls.
+func (w *World) GenerateNewChunk(x, y, z int) {
+	chunk := w.generator.GenerateChunkAt(x, y, z, w.bank)
+
+	w.allChunks[chunk.Position] = chunk
+	w.remeshNeeded = append(w.remeshNeeded, chunk)
 }
 
-func (w *World) LoadChunks(bank *BlockBank) {
-	for _, chunk := range w.Chunks {
-		meshData := w.mesher.Generate(chunk, w.Chunks, bank)
-		if meshData != nil {
-			mesh := NewMesh()
-			mesh.Load(meshData)
-			chunk.Mesh = mesh
+func (w *World) Update() {
+
+	// NOTE: later this must run in a worker goroutine
+	// generate meshes
+	if len(w.remeshNeeded) > 0 {
+		for _, c := range w.remeshNeeded {
+			c.meshData = w.mesher.Generate(c, w.allChunks, w.bank)
+			if c.meshData != nil {
+				w.uploadNeeded = append(w.uploadNeeded, c)
+			}
 		}
+
+		w.clearRemeshSlice()
 	}
+
+	// NOTE: later this must run on the main goroutine
+	// upload
+	if len(w.uploadNeeded) > 0 {
+		for _, c := range w.uploadNeeded {
+			// upload to gpu
+			if c.Mesh != nil {
+				c.Mesh.Dispose()
+			}
+			c.Mesh = NewMesh()
+			c.Mesh.Load(c.meshData)
+			c.meshData = nil
+
+			// add to list
+			w.Chunks[c.Position] = c
+		}
+
+		w.clearUploadSlice()
+	}
+}
+
+func (w *World) clearRemeshSlice() {
+	// TODO properly clear this (see: https://github.com/golang/go/wiki/SliceTricks)
+	// also clearing slices in go really sucks...
+	w.remeshNeeded = make([]*Chunk, 0)
+}
+
+func (w *World) clearUploadSlice() {
+	// TODO properly clear this (see: https://github.com/golang/go/wiki/SliceTricks)
+	// also clearing slices in go really sucks...
+	w.uploadNeeded = make([]*Chunk, 0)
 }
