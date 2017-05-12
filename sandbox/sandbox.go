@@ -54,8 +54,8 @@ func (s *Sandbox) Create() {
 	s.world = vox.NewWorld(s.blockBank, &vox.CulledMesher{}, &vox.FlatGenerator{})
 
 	// create huge flat 5x2x5 cube
-	for x := 0; x < 10; x++ {
-		for z := 0; z < 10; z++ {
+	for x := 0; x < 15; x++ {
+		for z := 0; z < 15; z++ {
 			for y := 0; y < 3; y++ {
 				s.world.GenerateNewChunk(x, -5+y, z)
 			}
@@ -108,8 +108,8 @@ func (s *Sandbox) KeyDown(key vox.Key) bool {
 	if key == vox.KeyEscape {
 		vox.Vox.Exit()
 	} else if key == vox.KeyEnter {
-		for x := 0; x < 5; x++ {
-			for z := 0; z < 5; z++ {
+		for x := 0; x < 10; x++ {
+			for z := 0; z < 10; z++ {
 				for y := 0; y < 3; y++ {
 					s.world.GenerateNewChunk(9+x, s.spawns+y, z)
 				}
@@ -117,8 +117,8 @@ func (s *Sandbox) KeyDown(key vox.Key) bool {
 		}
 		s.spawns += 3
 	} else if key == vox.KeyDelete {
-		for x := 0; x < 5; x++ {
-			for z := 0; z < 5; z++ {
+		for x := 0; x < 10; x++ {
+			for z := 0; z < 10; z++ {
 				for y := 0; y < 3; y++ {
 					s.world.RemoveChunk(9+x, s.spawns+y-3, z)
 				}

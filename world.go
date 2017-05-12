@@ -13,6 +13,10 @@
 
 package vox
 
+import (
+	"sync"
+)
+
 type World struct {
 	mesher    Mesher
 	generator Generator
@@ -23,8 +27,13 @@ type World struct {
 	remeshNeeded []*Chunk
 	uploadNeeded []*Chunk
 	unloadNeeded []*Chunk
+
+	remeshMutex sync.Mutex
+
+	MaxUploadsPerFrame int
 }
 
+// NewWorld creates a new world
 func NewWorld(bank *BlockBank, mesher Mesher, generator Generator) *World {
 	return &World{
 		mesher:    mesher,
@@ -36,6 +45,8 @@ func NewWorld(bank *BlockBank, mesher Mesher, generator Generator) *World {
 		remeshNeeded: make([]*Chunk, 0),
 		uploadNeeded: make([]*Chunk, 0),
 		unloadNeeded: make([]*Chunk, 0),
+
+		MaxUploadsPerFrame: 8,
 	}
 }
 
@@ -52,6 +63,7 @@ func (w *World) GenerateNewChunk(x, y, z int) {
 	w.remeshNeeded = append(w.remeshNeeded, chunk)
 }
 
+// RemoveChunk schedules the cunk for removal.
 func (w *World) RemoveChunk(x, y, z int) {
 	chunk := w.allChunks[ChunkPosition{x, y, z}]
 	if chunk != nil {
@@ -63,10 +75,14 @@ func (w *World) RemoveChunk(x, y, z int) {
 	}
 }
 
+// Update updates the chunk meshes
 func (w *World) Update() {
+	w.processUnloading()
+	w.processMeshing()
+	w.processUploading()
+}
 
-	// NOTE: later this must run in a worker goroutine
-	// generate meshes
+func (w *World) processMeshing() {
 	if len(w.remeshNeeded) > 0 {
 		for _, c := range w.remeshNeeded {
 			c.meshData = w.mesher.Generate(c, w.bank)
@@ -75,29 +91,41 @@ func (w *World) Update() {
 			}
 		}
 
-		w.clearRemeshSlice()
+		w.remeshNeeded = make([]*Chunk, 0)
+	}
+}
+
+func (w *World) processUploading() {
+	if len(w.uploadNeeded) == 0 {
+		return
 	}
 
-	// NOTE: later this must run on the main goroutine
-	// upload
-	if len(w.uploadNeeded) > 0 {
-		for _, c := range w.uploadNeeded {
-			// upload to gpu
-			if c.Mesh != nil {
-				c.Mesh.Dispose()
-			}
-			c.Mesh = NewMesh()
-			c.Mesh.Load(c.meshData)
-			c.meshData = nil
+	for i := 0; i < w.MaxUploadsPerFrame; i++ {
+		// pop chunk
+		chunk := w.uploadNeeded[0]
+		w.uploadNeeded = w.uploadNeeded[1:]
 
-			// add to list
-			w.Chunks[c.Position] = c
+		// dispose old mesh
+		if chunk.Mesh != nil {
+			chunk.Mesh.Dispose()
 		}
-		w.clearUploadSlice()
-	}
 
-	// NOTE: later this must run on the main goroutine
-	// unload
+		// upload new mesh
+		chunk.Mesh = NewMesh()
+		chunk.Mesh.Load(chunk.meshData)
+		chunk.meshData = nil
+
+		// add to list
+		w.Chunks[chunk.Position] = chunk
+
+		// done?
+		if len(w.uploadNeeded) == 0 {
+			return
+		}
+	}
+}
+
+func (w *World) processUnloading() {
 	if len(w.unloadNeeded) > 0 {
 		for _, c := range w.unloadNeeded {
 			// upload to gpu
@@ -105,24 +133,10 @@ func (w *World) Update() {
 				c.Mesh.Dispose()
 			}
 		}
-		w.clearUnloadSlice()
+		w.unloadNeeded = make([]*Chunk, 0)
 	}
 }
 
-func (w *World) clearRemeshSlice() {
-	// TODO properly clear this (see: https://github.com/golang/go/wiki/SliceTricks)
-	// also clearing slices in go really sucks...
-	w.remeshNeeded = make([]*Chunk, 0)
-}
-
-func (w *World) clearUploadSlice() {
-	// TODO properly clear this (see: https://github.com/golang/go/wiki/SliceTricks)
-	// also clearing slices in go really sucks...
-	w.uploadNeeded = make([]*Chunk, 0)
-}
-
-func (w *World) clearUnloadSlice() {
-	// TODO properly clear this (see: https://github.com/golang/go/wiki/SliceTricks)
-	// also clearing slices in go really sucks...
-	w.unloadNeeded = make([]*Chunk, 0)
+func (w *World) processGenerating() {
+	// TODO
 }
