@@ -86,14 +86,14 @@ func (cm *CulledMesher) Generate(chunk *Chunk, bank *BlockBank) *MeshData {
 				}
 
 				// front face
-				hasFace = front == BlockNil && (chunk.front == nil || !chunk.front.Get(x, y, ChunkDepth-1).Active())
+				hasFace = front == BlockNil && (chunk.front == nil || !chunk.front.Get(x, y, 0).Active())
 				hasFace = hasFace || front != BlockNil && !front.Active()
 				if hasFace {
 					cm.addFrontFace(xx, yy, zz, data, blockType)
 				}
 
 				// back face
-				hasFace = back == BlockNil && (chunk.back == nil || !chunk.back.Get(x, y, 0).Active())
+				hasFace = back == BlockNil && (chunk.back == nil || !chunk.back.Get(x, y, ChunkDepth-1).Active())
 				hasFace = hasFace || back != BlockNil && !back.Active()
 				if hasFace {
 					cm.addBackFace(xx, yy, zz, data, blockType)
