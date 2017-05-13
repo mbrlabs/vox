@@ -13,16 +13,6 @@
 
 package vox
 
-type Disposable interface {
-	Dispose()
-}
-
-func Sign(x int) int {
-	if x < 0 {
-		return -1
-	} else if x < 0 {
-		return 1
-	}
-
-	return 0
+type ChunkProvider interface {
+	GetChunk(x, y, z int) *Chunk
 }

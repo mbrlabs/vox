@@ -14,6 +14,7 @@
 package vox
 
 import "fmt"
+import "math"
 
 const (
 	ChunkWidth  = 16
@@ -32,6 +33,15 @@ func (p *ChunkPosition) Set(x, y, z int) *ChunkPosition {
 	p.Y = y
 	p.Z = z
 	return p
+}
+
+func (p *ChunkPosition) Equals(other *ChunkPosition) bool {
+	return p.X == other.X && p.Y == other.Y && p.Z == other.Z
+}
+
+func (v *ChunkPosition) Distance(other *ChunkPosition) float32 {
+	d2 := (v.X-other.X)*(v.X-other.X) + (v.Y-other.Y)*(v.Y-other.Y) + (v.Z-other.Z)*(v.Z-other.Z)
+	return float32(math.Sqrt(float64(d2)))
 }
 
 func (p *ChunkPosition) String() string {

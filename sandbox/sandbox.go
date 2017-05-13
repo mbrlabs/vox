@@ -19,11 +19,12 @@ import (
 )
 
 type Sandbox struct {
-	fpsController *vox.FpsCameraController
-	cam           *vox.Camera
-	renderer      *vox.WorldRenderer
-	world         *vox.World
-	oldX, dx      float32
+	fpsController   *vox.FpsCameraController
+	worldController *vox.InfiniteWorldController
+	cam             *vox.Camera
+	renderer        *vox.WorldRenderer
+	world           *vox.World
+	oldX, dx        float32
 
 	blockBank *vox.BlockBank
 	atlas     *vox.TextureAtlas
@@ -42,38 +43,24 @@ func (s *Sandbox) Create() {
 		s.blockBank.AddType(t)
 	}
 
+	// build camera
 	ratio := float32(windowWidth) / float32(windowHeight)
 	s.cam = vox.NewCamera(70, ratio, 0.01, 1000)
-	s.cam.Move(8, 15, 40)
+	s.cam.Move(0, vox.ChunkHeight*2, 0)
 	s.cam.Update()
 
+	// build world
+	s.world = vox.NewWorld(s.blockBank, &vox.CulledMesher{}, &vox.FlatGenerator{})
+
+	// setup fps controller
 	s.fpsController = vox.NewFpsController(s.cam)
 	vox.Vox.AddMouseListener(s.fpsController)
 	vox.Vox.AddKeyListener(s.fpsController)
 
-	s.world = vox.NewWorld(s.blockBank, &vox.CulledMesher{}, &vox.FlatGenerator{})
-
-	// create huge flat 5x2x5 cube
-	for x := 0; x < 15; x++ {
-		for z := 0; z < 15; z++ {
-			for y := 0; y < 3; y++ {
-				s.world.GenerateNewChunk(x, -5+y, z)
-			}
-		}
-	}
-
-	// create interesting connected chunks
-	s.world.GenerateNewChunk(0, -1, 0)
-	s.world.GenerateNewChunk(0, 0, 0)
-	s.world.GenerateNewChunk(0, 1, 0)
-	s.world.GenerateNewChunk(0, 2, 0)
-	s.world.GenerateNewChunk(1, 2, 0)
-	s.world.GenerateNewChunk(2, 2, 0)
-	s.world.GenerateNewChunk(2, 2, 1)
-	s.world.GenerateNewChunk(2, 2, 2)
-
+	// misc
 	s.renderer = vox.NewWorldRenderer()
 	s.fpsLogger = &vox.FpsLogger{}
+	s.worldController = vox.NewInifinteWorldController(s.cam, s.world)
 
 	gl.Enable(gl.DEPTH_TEST)
 }
@@ -84,6 +71,7 @@ func (s *Sandbox) Dispose() {
 }
 
 func (s *Sandbox) Update(delta float32) {
+	s.worldController.Update()
 	s.world.Update()
 
 	s.fpsController.Update(delta)

@@ -113,6 +113,11 @@ func (v *Vector3) Rotate(other *Vector3, degrees float32) *Vector3 {
 	return v.MulMat4(tmpMat4)
 }
 
+func (v *Vector3) Distance(other *Vector3) float32 {
+	d2 := (v.X-other.X)*(v.X-other.X) + (v.Y-other.Y)*(v.Y-other.Y) + (v.Z-other.Z)*(v.Z-other.Z)
+	return float32(math.Sqrt(float64(d2)))
+}
+
 func (v *Vector3) String() string {
 	return fmt.Sprintf("Vector3{%v, %v, %v}\n", v.X, v.Y, v.Z)
 }
