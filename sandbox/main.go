@@ -48,7 +48,7 @@ func main() {
 		Width:        windowWidth,
 		Title:        windowTitle,
 		Resizable:    false,
-		Fullscreen:   false,
+		Fullscreen:   true,
 		Vsync:        true,
 		HiddenCursor: true,
 	})

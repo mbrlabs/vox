@@ -17,7 +17,7 @@ import (
 	"math"
 )
 
-const Radius = 8
+const Radius = 12
 
 type World struct {
 	mesher    Mesher

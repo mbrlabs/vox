@@ -225,7 +225,15 @@ func NewWindow(config *WindowConfig) *Window {
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 
 	// create window & make current
-	window, err := glfw.CreateWindow(config.Width, config.Height, config.Title, nil, nil)
+	var monitor *glfw.Monitor
+	height := config.Height
+	width := config.Width
+
+	if config.Fullscreen {
+		monitor = glfw.GetPrimaryMonitor()
+		width, height = monitor.GetVideoMode().Width, monitor.GetVideoMode().Height
+	}
+	window, err := glfw.CreateWindow(width, height, config.Title, monitor, nil)
 	if err != nil {
 		panic(err)
 	}
