@@ -13,38 +13,10 @@
 
 package vox
 
-import (
-	"math/rand"
-)
+import "math/rand"
 
 type Generator interface {
 	GenerateChunkAt(x, y, z int, bank *BlockBank) *Chunk
-}
-
-type RandomGenerator struct {
-}
-
-func (g *RandomGenerator) GenerateChunkAt(x, y, z int, bank *BlockBank) *Chunk {
-	c := NewChunk(x, y, z)
-
-	typeIdx := 0
-	for i := 0; i < ChunkXYZ; i++ {
-		//active or inactive
-		if rand.Int()%2 == 0 {
-			c.Blocks[i] = c.Blocks[i].Activate(true)
-		} else {
-			continue
-		}
-
-		// block type (color)
-		if typeIdx >= len(bank.Types) {
-			typeIdx = 0
-		}
-		c.Blocks[i] = c.Blocks[i].ChangeType(bank.Types[typeIdx])
-		typeIdx++
-	}
-
-	return c
 }
 
 type FlatGenerator struct {
@@ -68,32 +40,6 @@ func (g *FlatGenerator) GenerateChunkAt(x, y, z int, bank *BlockBank) *Chunk {
 	return c
 }
 
-type StairGenerator struct {
-}
-
-func (g *StairGenerator) GenerateChunkAt(x, y, z int, bank *BlockBank) *Chunk {
-	c := NewChunk(x, y, z)
-
-	typeIdx := 0
-	for z := 0; z < ChunkDepth; z++ {
-		for x := 0; x < ChunkWidth; x++ {
-			for y := 0; y < ChunkHeight; y++ {
-				i := c.IndexAt(x, y, z)
-				c.Blocks[i] = c.Blocks[i].Activate(y <= x)
-
-				// block type
-				if typeIdx >= len(bank.Types) {
-					typeIdx = 0
-				}
-				c.Blocks[i] = c.Blocks[i].ChangeType(bank.Types[typeIdx])
-				typeIdx++
-			}
-		}
-	}
-
-	return c
-}
-
 type SimplexGenerator struct {
 	seed  int64
 	noise *SimplexNoise
@@ -109,7 +55,7 @@ func NewSimplexGenerator(seed int64) Generator {
 func (g *SimplexGenerator) GenerateChunkAt(xx, yy, zz int, bank *BlockBank) *Chunk {
 	c := NewChunk(xx, yy, zz)
 
-	//t := uint8(1 + rand.Int()%3)
+	t := uint8(1 + rand.Int()%3)
 
 	worldX := float64(xx)
 	worldZ := float64(zz)
@@ -129,7 +75,7 @@ func (g *SimplexGenerator) GenerateChunkAt(xx, yy, zz int, bank *BlockBank) *Chu
 				if typeIdx >= len(bank.Types) {
 					typeIdx = 0
 				}
-				c.Blocks[i] = c.Blocks[i].ChangeType(bank.typeMap[2])
+				c.Blocks[i] = c.Blocks[i].ChangeType(bank.typeMap[t])
 				typeIdx++
 			}
 		}
