@@ -18,10 +18,9 @@ import (
 )
 
 const (
-	AttribIndexPositions   = 0
-	AttribIndexNormals     = 1
-	AttribNormalsPositions = 2
-	AttribIndexUvs         = 3
+	AttribIndexPositions = 0
+	AttribIndexNormals   = 1
+	AttribIndexUvs       = 2
 )
 
 var (
@@ -98,7 +97,7 @@ func (m *Mesh) Load(data *MeshData) {
 	// normals
 	gl.BindBuffer(gl.ARRAY_BUFFER, m.normalBuffer)
 	gl.BufferData(gl.ARRAY_BUFFER, len(normals)*4, gl.Ptr(normals), gl.STATIC_DRAW)
-	gl.VertexAttribPointer(AttribNormalsPositions, 3, gl.FLOAT, false, 0, gl.PtrOffset(0))
+	gl.VertexAttribPointer(AttribIndexNormals, 3, gl.FLOAT, false, 0, gl.PtrOffset(0))
 
 	// uvs
 	gl.BindBuffer(gl.ARRAY_BUFFER, m.uvBuffer)

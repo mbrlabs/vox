@@ -24,6 +24,7 @@ type Sandbox struct {
 	cam             *vox.Camera
 	renderer        *vox.WorldRenderer
 	world           *vox.World
+	env             *vox.Environment
 	oldX, dx        float32
 
 	blockBank *vox.BlockBank
@@ -61,6 +62,7 @@ func (s *Sandbox) Create() {
 	s.renderer = vox.NewWorldRenderer()
 	s.fpsLogger = &vox.FpsLogger{}
 	s.worldController = vox.NewInifinteWorldController(s.cam, s.world)
+	s.env = vox.NewEnvironment()
 
 	gl.Enable(gl.DEPTH_TEST)
 }
@@ -85,7 +87,7 @@ func (s *Sandbox) Render(delta float32) {
 
 	// render world
 	s.atlas.Bind()
-	s.renderer.Render(s.cam, s.world)
+	s.renderer.Render(s.cam, s.world, s.env)
 }
 
 func (s *Sandbox) Resize(width, height int) {
@@ -95,24 +97,6 @@ func (s *Sandbox) Resize(width, height int) {
 func (s *Sandbox) KeyDown(key vox.Key) bool {
 	if key == vox.KeyEscape {
 		vox.Vox.Exit()
-	} else if key == vox.KeyEnter {
-		for x := 0; x < 10; x++ {
-			for z := 0; z < 10; z++ {
-				for y := 0; y < 3; y++ {
-					s.world.GenerateNewChunk(9+x, s.spawns+y, z)
-				}
-			}
-		}
-		s.spawns += 3
-	} else if key == vox.KeyDelete {
-		for x := 0; x < 10; x++ {
-			for z := 0; z < 10; z++ {
-				for y := 0; y < 3; y++ {
-					s.world.RemoveChunk(9+x, s.spawns+y-3, z)
-				}
-			}
-		}
-		s.spawns -= 3
 	}
 
 	return false

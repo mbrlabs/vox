@@ -125,7 +125,7 @@ func (cm *CulledMesher) addLeftFace(x, y, z float32, data *MeshData, blockType *
 		x, y+CubeSize, z,
 		x, y+CubeSize, z-CubeSize,
 	)
-	data.Normals = append(data.Positions,
+	data.Normals = append(data.Normals,
 		-1, 0, 0,
 		-1, 0, 0,
 		-1, 0, 0,
@@ -160,10 +160,10 @@ func (cm *CulledMesher) addTopFace(x, y, z float32, data *MeshData, blockType *B
 		x, y+CubeSize, z-CubeSize,
 	)
 	data.Normals = append(data.Normals,
-		-1, 0, 0,
-		-1, 0, 0,
-		-1, 0, 0,
-		-1, 0, 0,
+		0, 1, 0,
+		0, 1, 0,
+		0, 1, 0,
+		0, 1, 0,
 	)
 	cm.addUvs(data, blockType.Top)
 	data.IndexCount += 6

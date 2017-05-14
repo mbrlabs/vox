@@ -19,15 +19,19 @@ const worldVert = `
 #version 330 
 
 uniform mat4 u_mvp;
+uniform vec3 u_sun_direction;
 
 in vec3 a_pos;
 in vec3 a_norm;
 in vec2 a_uv;
 
 out vec2 texCoords;
+out float diffuse;
 
 void main() {
 	texCoords = a_uv;
+	diffuse = dot(a_norm, u_sun_direction);
+	diffuse = clamp(diffuse, 0.2, 1);
     gl_Position = u_mvp * vec4(a_pos, 1.0);
 }
 `
@@ -36,12 +40,16 @@ const worldFrag = `
 #version 330
 
 uniform sampler2D tex;
+uniform vec3 u_sun_color;
 
 in vec2 texCoords;
+in float diffuse;
+
 out vec4 outColor;
 
 void main() {
-    outColor = texture(tex, texCoords);
+	vec4 light = vec4(diffuse * u_sun_color, 1);
+	outColor = light * texture(tex, texCoords);
 }
 `
 
@@ -73,8 +81,10 @@ void main() {
 type WorldRenderer struct {
 	Disposable
 
-	solidShader     *Shader
-	uniformSolidMvp int32
+	solidShader         *Shader
+	uniformSolidMvp     int32
+	uniformSunDirection int32
+	uniformSunColor     int32
 
 	wireShader     *Shader
 	uniformWireMvp int32
@@ -102,10 +112,12 @@ func NewWorldRenderer() *WorldRenderer {
 	}
 
 	return &WorldRenderer{
-		solidShader:     ss,
-		wireShader:      ws,
-		uniformSolidMvp: gl.GetUniformLocation(ss.ID, gl.Str("u_mvp\x00")),
-		uniformWireMvp:  gl.GetUniformLocation(ws.ID, gl.Str("u_mvp\x00")),
+		solidShader:         ss,
+		wireShader:          ws,
+		uniformWireMvp:      gl.GetUniformLocation(ws.ID, gl.Str("u_mvp\x00")),
+		uniformSolidMvp:     gl.GetUniformLocation(ss.ID, gl.Str("u_mvp\x00")),
+		uniformSunDirection: gl.GetUniformLocation(ss.ID, gl.Str("u_sun_direction\x00")),
+		uniformSunColor:     gl.GetUniformLocation(ss.ID, gl.Str("u_sun_color\x00")),
 	}
 }
 
@@ -114,12 +126,15 @@ func (r *WorldRenderer) Dispose() {
 	r.wireShader.Dispose()
 }
 
-func (r *WorldRenderer) Render(cam *Camera, world *World) {
+func (r *WorldRenderer) Render(cam *Camera, world *World, env *Environment) {
 	for _, chunk := range world.Chunks {
 		// can happen if chunk is completly sourrounded by other chunks and not a single triange would be drawn
 		if chunk.Mesh == nil {
 			continue
 		}
+
+		sunDir := env.Sun.Direction
+		sunColor := env.Sun.Color
 
 		chunk.Mesh.Bind()
 
@@ -127,6 +142,10 @@ func (r *WorldRenderer) Render(cam *Camera, world *World) {
 		r.solidShader.Enable()
 		gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
 		gl.UniformMatrix4fv(r.uniformSolidMvp, 1, false, &cam.Combined.Data[0])
+		gl.UniformMatrix4fv(r.uniformSolidMvp, 1, false, &cam.Combined.Data[0])
+		gl.Uniform3f(r.uniformSunColor, sunColor.R, sunColor.G, sunColor.B)
+		gl.Uniform3f(r.uniformSunDirection, sunDir.X, sunDir.Y, sunDir.Z)
+
 		gl.DrawElements(gl.TRIANGLES, chunk.Mesh.IndexCount, gl.UNSIGNED_SHORT, gl.PtrOffset(0))
 
 		// wireframe render
