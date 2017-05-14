@@ -125,6 +125,12 @@ func (cm *CulledMesher) addLeftFace(x, y, z float32, data *MeshData, blockType *
 		x, y+CubeSize, z,
 		x, y+CubeSize, z-CubeSize,
 	)
+	data.Normals = append(data.Positions,
+		-1, 0, 0,
+		-1, 0, 0,
+		-1, 0, 0,
+		-1, 0, 0,
+	)
 	cm.addUvs(data, blockType.Side)
 	data.IndexCount += 6
 }
@@ -135,6 +141,12 @@ func (cm *CulledMesher) addRightFace(x, y, z float32, data *MeshData, blockType 
 		x+CubeSize, y, z-CubeSize,
 		x+CubeSize, y+CubeSize, z-CubeSize,
 		x+CubeSize, y+CubeSize, z,
+	)
+	data.Normals = append(data.Normals,
+		1, 0, 0,
+		1, 0, 0,
+		1, 0, 0,
+		1, 0, 0,
 	)
 	cm.addUvs(data, blockType.Side)
 	data.IndexCount += 6
@@ -147,6 +159,12 @@ func (cm *CulledMesher) addTopFace(x, y, z float32, data *MeshData, blockType *B
 		x+CubeSize, y+CubeSize, z-CubeSize,
 		x, y+CubeSize, z-CubeSize,
 	)
+	data.Normals = append(data.Normals,
+		-1, 0, 0,
+		-1, 0, 0,
+		-1, 0, 0,
+		-1, 0, 0,
+	)
 	cm.addUvs(data, blockType.Top)
 	data.IndexCount += 6
 }
@@ -157,6 +175,12 @@ func (cm *CulledMesher) addBottomFace(x, y, z float32, data *MeshData, blockType
 		x+CubeSize, y, z,
 		x+CubeSize, y, z-CubeSize,
 		x, y, z-CubeSize,
+	)
+	data.Normals = append(data.Normals,
+		0, -1, 0,
+		0, -1, 0,
+		0, -1, 0,
+		0, -1, 0,
 	)
 	cm.addUvs(data, blockType.Bottom)
 	data.IndexCount += 6
@@ -169,6 +193,12 @@ func (cm *CulledMesher) addFrontFace(x, y, z float32, data *MeshData, blockType 
 		x+CubeSize, y+CubeSize, z,
 		x, y+CubeSize, z,
 	)
+	data.Normals = append(data.Normals,
+		0, 0, 1,
+		0, 0, 1,
+		0, 0, 1,
+		0, 0, 1,
+	)
 	cm.addUvs(data, blockType.Side)
 	data.IndexCount += 6
 }
@@ -179,6 +209,12 @@ func (cm *CulledMesher) addBackFace(x, y, z float32, data *MeshData, blockType *
 		x+CubeSize, y, z-CubeSize,
 		x+CubeSize, y+CubeSize, z-CubeSize,
 		x, y+CubeSize, z-CubeSize,
+	)
+	data.Normals = append(data.Normals,
+		0, 0, -1,
+		0, 0, -1,
+		0, 0, -1,
+		0, 0, -1,
 	)
 	cm.addUvs(data, blockType.Side)
 	data.IndexCount += 6

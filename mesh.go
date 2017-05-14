@@ -18,9 +18,10 @@ import (
 )
 
 const (
-	AttribIndexPositions = 0
-	AttribIndexNormals   = 1
-	AttribIndexUvs       = 2
+	AttribIndexPositions   = 0
+	AttribIndexNormals     = 1
+	AttribNormalsPositions = 2
+	AttribIndexUvs         = 3
 )
 
 var (
@@ -49,6 +50,7 @@ func createChunkIndexBuffer() {
 
 type MeshData struct {
 	Positions  []float32
+	Normals    []float32
 	Uvs        []float32
 	IndexCount int
 }
@@ -56,6 +58,7 @@ type MeshData struct {
 type Mesh struct {
 	vao            uint32
 	positionBuffer uint32
+	normalBuffer   uint32
 	uvBuffer       uint32
 
 	IndexCount int32
@@ -65,6 +68,7 @@ func NewMesh() *Mesh {
 	mesh := &Mesh{}
 	gl.GenVertexArrays(1, &mesh.vao)
 	gl.GenBuffers(1, &mesh.positionBuffer)
+	gl.GenBuffers(1, &mesh.normalBuffer)
 	gl.GenBuffers(1, &mesh.uvBuffer)
 
 	return mesh
@@ -78,6 +82,7 @@ func (m *Mesh) Load(data *MeshData) {
 	}
 
 	positions := data.Positions
+	normals := data.Normals
 	uvs := data.Uvs
 
 	gl.BindVertexArray(m.vao)
@@ -89,6 +94,11 @@ func (m *Mesh) Load(data *MeshData) {
 	gl.BindBuffer(gl.ARRAY_BUFFER, m.positionBuffer)
 	gl.BufferData(gl.ARRAY_BUFFER, len(positions)*4, gl.Ptr(positions), gl.STATIC_DRAW)
 	gl.VertexAttribPointer(AttribIndexPositions, 3, gl.FLOAT, false, 0, gl.PtrOffset(0))
+
+	// normals
+	gl.BindBuffer(gl.ARRAY_BUFFER, m.normalBuffer)
+	gl.BufferData(gl.ARRAY_BUFFER, len(normals)*4, gl.Ptr(normals), gl.STATIC_DRAW)
+	gl.VertexAttribPointer(AttribNormalsPositions, 3, gl.FLOAT, false, 0, gl.PtrOffset(0))
 
 	// uvs
 	gl.BindBuffer(gl.ARRAY_BUFFER, m.uvBuffer)
@@ -105,10 +115,12 @@ func (m *Mesh) Bind() {
 	gl.BindVertexArray(m.vao)
 	gl.EnableVertexAttribArray(AttribIndexPositions)
 	gl.EnableVertexAttribArray(AttribIndexUvs)
+	gl.EnableVertexAttribArray(AttribIndexNormals)
 }
 
 func (m *Mesh) Unbind() {
-	gl.EnableVertexAttribArray(AttribIndexUvs)
+	gl.DisableVertexAttribArray(AttribIndexNormals)
+	gl.DisableVertexAttribArray(AttribIndexUvs)
 	gl.DisableVertexAttribArray(AttribIndexPositions)
 	gl.BindVertexArray(0)
 }
@@ -116,5 +128,6 @@ func (m *Mesh) Unbind() {
 func (m *Mesh) Dispose() {
 	gl.DeleteBuffers(1, &m.positionBuffer)
 	gl.DeleteBuffers(1, &m.uvBuffer)
+	gl.DeleteBuffers(1, &m.normalBuffer)
 	gl.DeleteVertexArrays(1, &m.vao)
 }
