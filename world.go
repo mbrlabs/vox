@@ -17,7 +17,7 @@ import (
 	"math"
 )
 
-const Radius = 10
+const Radius = 8
 
 type World struct {
 	mesher    Mesher
@@ -76,6 +76,7 @@ func (w *World) RemoveChunk(x, y, z int) {
 		chunk.unsetNeighbors()
 		delete(w.allChunks, chunk.Position)
 		delete(w.Chunks, chunk.Position)
+		delete(w.uploadNeeded, chunk.Position)
 		delete(w.meshingNeeded, chunk.Position)
 
 		w.disposeNeeded[chunk.Position] = chunk

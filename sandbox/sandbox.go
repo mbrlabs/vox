@@ -50,7 +50,7 @@ func (s *Sandbox) Create() {
 	s.cam.Update()
 
 	// build world
-	s.world = vox.NewWorld(s.blockBank, &vox.CulledMesher{}, &vox.FlatGenerator{})
+	s.world = vox.NewWorld(s.blockBank, &vox.CulledMesher{}, vox.NewSimplexGenerator(16726))
 
 	// setup fps controller
 	s.fpsController = vox.NewFpsController(s.cam)

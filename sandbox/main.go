@@ -16,7 +16,12 @@ package main
 import (
 	"runtime"
 
+	"fmt"
+
+	"time"
+
 	"github.com/mbrlabs/vox"
+	opensimplex "github.com/ojrac/opensimplex-go"
 )
 
 const (
@@ -32,6 +37,12 @@ func init() {
 }
 
 func main() {
+	noise := opensimplex.NewWithSeed(25)
+	t := time.Now().Nanosecond()
+	n := float32(noise.Eval2(10, 5)) * 100
+	t = time.Now().Nanosecond() - t
+	fmt.Printf("[%v] -> %v\n", t, n)
+
 	window := vox.NewWindow(&vox.WindowConfig{
 		Height:       windowHeight,
 		Width:        windowWidth,
