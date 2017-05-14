@@ -21,7 +21,7 @@ type FpsCameraController struct {
 
 	cam         *Camera
 	pressedKeys map[Key]bool
-	tmp         glm.Vector3
+	tmp         *glm.Vector3
 }
 
 func NewFpsController(cam *Camera) *FpsCameraController {
@@ -30,6 +30,7 @@ func NewFpsController(cam *Camera) *FpsCameraController {
 		Velocity:       50,
 		cam:            cam,
 		pressedKeys:    make(map[Key]bool),
+		tmp:            &glm.Vector3{},
 	}
 }
 
@@ -83,7 +84,7 @@ func (c *FpsCameraController) MouseMoved(x, y float64) bool {
 	dy := -Vox.DeltaMouseY() * c.MouseSensivity
 	c.cam.direction.Rotate(c.cam.up, dx)
 	c.tmp.SetVector3(c.cam.direction).Cross(c.cam.up).Norm()
-	c.cam.direction.Rotate(&c.tmp, dy)
+	c.cam.direction.Rotate(c.tmp, dy)
 
 	return false
 }

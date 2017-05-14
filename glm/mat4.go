@@ -165,6 +165,7 @@ func (m *Mat4) Scale(x, y, z float32) *Mat4 {
 
 func (m *Mat4) Rotation(angle, xAxis, yAxis, zAxis float32) *Mat4 {
 	if angle == 0 {
+		m.Identity()
 		return m
 	}
 
